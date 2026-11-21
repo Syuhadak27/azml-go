@@ -23,6 +23,33 @@ func SetBotStartTime(t time.Time) {
 	BotStartTime = t
 }
 
+// localizeTaskStatus translates internal task status identifiers for display only.
+// Internal values are kept as-is so filters and callbacks continue to work.
+func localizeTaskStatus(status types.TaskStatus) string {
+	switch status {
+	case types.StatusDownloading:
+		return "Mengunduh"
+	case types.StatusUploading:
+		return "Mengunggah"
+	case types.StatusSplitting:
+		return "Memecah"
+	case types.StatusFFmpeg:
+		return "FFmpeg"
+	case types.StatusExtracting:
+		return "Mengekstrak"
+	case types.StatusArchiving:
+		return "Mengarsipkan"
+	case types.StatusQueuedDL:
+		return "Antrean Unduh"
+	case types.StatusQueuedUP:
+		return "Antrean Unggah"
+	case types.StatusPaused:
+		return "Dijeda"
+	default:
+		return string(status)
+	}
+}
+
 type TaskManager struct {
 	tasks map[string]types.DownloadTask
 	mu    sync.RWMutex
@@ -177,13 +204,13 @@ func (m *TaskManager) BuildStatusMessage(page int) (string, *telegram.ButtonMake
 			"┠ <b>%s:</b> <code>%.1f%%</code> | <b>%s:</b> <code>%.1f MB</code>\n"+
 			"┠ <b>%s:</b> <code>%s</code>\n"+
 			"┖ <b>%s:</b> <code>%s</code>",
-			telegram.ToSmallCaps("No Active Tasks Running!"),
-			telegram.ToSmallCaps("Bot Stats"),
-			telegram.ToSmallCaps("System RAM"), mem.OSPercent, telegram.ToSmallCaps("App RAM"), mem.AppRAMMB,
-			telegram.ToSmallCaps("Disk Free"), mem.OSFree,
-			telegram.ToSmallCaps("Uptime"), uptime)
+			telegram.ToSmallCaps("Tidak Ada Tugas Aktif Berjalan!"),
+			telegram.ToSmallCaps("Statistik Bot"),
+			telegram.ToSmallCaps("RAM Sistem"), mem.OSPercent, telegram.ToSmallCaps("RAM Aplikasi"), mem.AppRAMMB,
+			telegram.ToSmallCaps("Disk Tersedia"), mem.OSFree,
+			telegram.ToSmallCaps("Waktu Aktif"), uptime)
 		btn := telegram.NewButtonMaker()
-		btn.IButtonStyled("⌬ "+telegram.ToSmallCaps("Refresh"), "status ref 1", "primary")
+		btn.IButtonStyled("⌬ "+telegram.ToSmallCaps("Muat Ulang"), "status ref 1", "primary")
 		btn.Row()
 		return noTaskMsg, btn
 	}
@@ -234,26 +261,26 @@ func (m *TaskManager) BuildStatusMessage(page int) (string, *telegram.ButtonMake
 
 		sb.WriteString(fmt.Sprintf("◈ <b>%s</b>\n", SanitizeFilename(t.Name())))
 		sb.WriteString(fmt.Sprintf("┃ [%s] <code>%.1f%%</code>\n", bar, pct))
-		sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <code>%s</code> / <code>%s</code>\n", telegram.ToSmallCaps("Processed"), GetReadableFileSize(t.DownloadedBytes()), GetReadableFileSize(t.Size())))
-		sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <i>%s</i> | <b>%s:</b> <code>%s</code>\n", telegram.ToSmallCaps("Status"), t.Status(), telegram.ToSmallCaps("ETA"), t.ETA()))
-		sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <code>%s/s</code> | <b>%s:</b> <code>%s</code>\n", telegram.ToSmallCaps("Speed"), GetReadableFileSize(int64(t.Speed())), telegram.ToSmallCaps("Elapsed"), elapsed))
-		sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <code>%s</code>\n", telegram.ToSmallCaps("Engine"), t.Engine()))
+		sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <code>%s</code> / <code>%s</code>\n", telegram.ToSmallCaps("Diproses"), GetReadableFileSize(t.DownloadedBytes()), GetReadableFileSize(t.Size())))
+		sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <i>%s</i> | <b>%s:</b> <code>%s</code>\n", telegram.ToSmallCaps("Status"), localizeTaskStatus(t.Status()), telegram.ToSmallCaps("ETA"), t.ETA()))
+		sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <code>%s/s</code> | <b>%s:</b> <code>%s</code>\n", telegram.ToSmallCaps("Kecepatan"), GetReadableFileSize(int64(t.Speed())), telegram.ToSmallCaps("Waktu Berjalan"), elapsed))
+		sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <code>%s</code>\n", telegram.ToSmallCaps("Mesin"), t.Engine()))
 		uID := t.UserID()
 		if uID == 0 {
 			uID = cfg.OwnerID
 		}
-		sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <code>%d</code>\n", telegram.ToSmallCaps("User ID"), uID))
+		sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <code>%d</code>\n", telegram.ToSmallCaps("ID Pengguna"), uID))
 		sb.WriteString(fmt.Sprintf("┖ /cancel_%s\n\n", t.GID()))
 	}
 
 	mem := GetMemoryStats()
 	uptime := TimeSinceFormatted(BotStartTime)
 
-	sb.WriteString(fmt.Sprintf("⌬ <b><u>%s</u></b>\n", telegram.ToSmallCaps("Bot Status")))
-	sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <code>%d</code>\n", telegram.ToSmallCaps("Active Tasks"), totalTasks))
-	sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <code>%.1f%%</code> | <b>%s:</b> <code>%.1f MB</code>\n", telegram.ToSmallCaps("System RAM"), mem.OSPercent, telegram.ToSmallCaps("App RAM"), mem.AppRAMMB))
-	sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <code>%s</code>\n", telegram.ToSmallCaps("Uptime"), uptime))
-	sb.WriteString(fmt.Sprintf("┖ <b>%s:</b> <code>%s/s</code> | <b>%s:</b> <code>%s/s</code>", telegram.ToSmallCaps("DL Speed"), GetReadableFileSize(int64(totalDL)), telegram.ToSmallCaps("UL Speed"), GetReadableFileSize(int64(totalUL))))
+	sb.WriteString(fmt.Sprintf("⌬ <b><u>%s</u></b>\n", telegram.ToSmallCaps("Status Bot")))
+	sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <code>%d</code>\n", telegram.ToSmallCaps("Tugas Aktif"), totalTasks))
+	sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <code>%.1f%%</code> | <b>%s:</b> <code>%.1f MB</code>\n", telegram.ToSmallCaps("RAM Sistem"), mem.OSPercent, telegram.ToSmallCaps("RAM Aplikasi"), mem.AppRAMMB))
+	sb.WriteString(fmt.Sprintf("┠ <b>%s:</b> <code>%s</code>\n", telegram.ToSmallCaps("Waktu Aktif"), uptime))
+	sb.WriteString(fmt.Sprintf("┖ <b>%s:</b> <code>%s/s</code> | <b>%s:</b> <code>%s/s</code>", telegram.ToSmallCaps("Kecepatan Unduh"), GetReadableFileSize(int64(totalDL)), telegram.ToSmallCaps("Kecepatan Unggah"), GetReadableFileSize(int64(totalUL))))
 
 	btn := telegram.NewButtonMaker()
 
@@ -269,11 +296,11 @@ func (m *TaskManager) BuildStatusMessage(page int) (string, *telegram.ButtonMake
 		}
 
 		btn.IButtonStyled("⫷", fmt.Sprintf("status page %d", prevPage), "primary")
-		btn.IButtonStyled(fmt.Sprintf("⌬ %s %d/%d", telegram.ToSmallCaps("Pages"), page, totalPages), fmt.Sprintf("status ref %d", page), "primary")
+		btn.IButtonStyled(fmt.Sprintf("⌬ %s %d/%d", telegram.ToSmallCaps("Halaman"), page, totalPages), fmt.Sprintf("status ref %d", page), "primary")
 		btn.IButtonStyled("⫸", fmt.Sprintf("status page %d", nextPage), "primary")
 		btn.Row()
 	} else {
-		btn.IButtonStyled("⌬ "+telegram.ToSmallCaps("Refresh"), fmt.Sprintf("status ref %d", page), "primary")
+		btn.IButtonStyled("⌬ "+telegram.ToSmallCaps("Muat Ulang"), fmt.Sprintf("status ref %d", page), "primary")
 		btn.Row()
 	}
 

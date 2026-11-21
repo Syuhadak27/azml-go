@@ -65,24 +65,24 @@ func TryDDLAPI(ctx context.Context, channelID int64, messageID int) (string, err
 	client := &http.Client{Timeout: 45 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("ddl api request error: %v", err)
+		return "", fmt.Errorf("kesalahan permintaan API ddl: %v", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("ddl api returned status %d", resp.StatusCode)
+		return "", fmt.Errorf("API ddl mengembalikan status %d", resp.StatusCode)
 	}
 
 	var data ddlResp
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		return "", fmt.Errorf("ddl api json decode error: %v", err)
+		return "", fmt.Errorf("kesalahan dekode JSON API ddl: %v", err)
 	}
 
 	if data.Success && data.DownloadLink != "" {
 		return data.DownloadLink, nil
 	}
 
-	return "", fmt.Errorf("ddl api returned unsuccessful: %s", data.Error)
+	return "", fmt.Errorf("API ddl mengembalikan hasil gagal: %s", data.Error)
 }
 
 // ParseTelegramLink extracts channel ID and message ID from Telegram links
@@ -182,7 +182,7 @@ func extractGofileLink(rawURL string) (string, error) {
 		contentID = match[1]
 	}
 	if contentID == "" {
-		return rawURL, fmt.Errorf("invalid gofile URL")
+		return rawURL, fmt.Errorf("URL gofile tidak valid")
 	}
 
 	// Create or fetch guest token
@@ -238,7 +238,7 @@ func extractGofileLink(rawURL string) (string, error) {
 		}
 	}
 
-	return rawURL, fmt.Errorf("failed to extract gofile direct download link")
+	return rawURL, fmt.Errorf("gagal mengekstrak tautan unduh langsung gofile")
 }
 
 func extractMediafireLink(link string) (string, error) {

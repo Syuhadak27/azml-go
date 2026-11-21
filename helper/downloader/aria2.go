@@ -218,7 +218,7 @@ func autoInstallStaticAria2(targetPath string) error {
 		log.Printf("[Aria2c] Auto-install failed: %v", lastErr)
 		return lastErr
 	}
-	return errors.New("static binary not found in archive")
+	return errors.New("biner statis tidak ditemukan dalam arsip")
 }
 
 func (a *Aria2RPCClient) EnsureStarted() error {
@@ -318,7 +318,7 @@ func (a *Aria2RPCClient) rawCall(req JSONRPCRequest) (*JSONRPCResponse, error) {
 		return nil, err
 	}
 	if rpcResp.Error != nil {
-		return nil, fmt.Errorf("aria2 error (%d): %s", rpcResp.Error.Code, rpcResp.Error.Message)
+		return nil, fmt.Errorf("kesalahan aria2 (%d): %s", rpcResp.Error.Code, rpcResp.Error.Message)
 	}
 	return &rpcResp, nil
 }
@@ -585,7 +585,7 @@ func (t *Aria2DownloadTask) PollUntilComplete(ctx context.Context, onProgress fu
 		select {
 		case <-ctx.Done():
 			_ = t.Cancel()
-			return "", errors.New("download cancelled")
+			return "", errors.New("unduhan dibatalkan")
 		case <-ticker.C:
 			res, err := t.client.TellStatus(t.gid)
 			if err != nil {
@@ -657,7 +657,7 @@ func (t *Aria2DownloadTask) PollUntilComplete(ctx context.Context, onProgress fu
 				}
 				return path, nil
 			case "error":
-				return "", fmt.Errorf("aria2 download failed: %s", res.ErrorMessage)
+				return "", fmt.Errorf("unduhan aria2 gagal: %s", res.ErrorMessage)
 			case "removed":
 				t.mu.RLock()
 				path := t.downloadPath
@@ -667,7 +667,7 @@ func (t *Aria2DownloadTask) PollUntilComplete(ctx context.Context, onProgress fu
 						return path, nil
 					}
 				}
-				return "", errors.New("download cancelled or removed from aria2")
+				return "", errors.New("unduhan dibatalkan atau dihapus dari aria2")
 			}
 		}
 	}

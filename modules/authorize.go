@@ -31,7 +31,7 @@ func NewAuthorizeModule(sender *telegram.MessageSender, userMap *types.SafeUserM
 
 func (m *AuthorizeModule) HandleAuthorize(ctx context.Context, peer tg.InputPeerClass, msg *types.MessageContext) {
 	if !telegram.IsOwner(msg.UserID) && !telegram.IsSudo(msg.UserID, m.userMap) {
-		_, _ = m.sender.SendMessage(ctx, peer, "Only Owner/Sudo can authorize!", msg.MessageID, nil)
+		_, _ = m.sender.SendMessage(ctx, peer, "Hanya Pemilik/Sudo yang dapat mengizinkan!", msg.MessageID, nil)
 		return
 	}
 
@@ -43,12 +43,12 @@ func (m *AuthorizeModule) HandleAuthorize(ctx context.Context, peer tg.InputPeer
 	u := m.userMap.GetOrCreate(targetID)
 	u.IsAuth = true
 	_ = ext.DB.SaveUser(u)
-	_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("✓ <b>Authorized:</b> <code>%d</code>", targetID), msg.MessageID, nil)
+	_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("✓ <b>Diizinkan:</b> <code>%d</code>", targetID), msg.MessageID, nil)
 }
 
 func (m *AuthorizeModule) HandleUnauthorize(ctx context.Context, peer tg.InputPeerClass, msg *types.MessageContext) {
 	if !telegram.IsOwner(msg.UserID) && !telegram.IsSudo(msg.UserID, m.userMap) {
-		_, _ = m.sender.SendMessage(ctx, peer, "Only Owner/Sudo can unauthorize!", msg.MessageID, nil)
+		_, _ = m.sender.SendMessage(ctx, peer, "Hanya Pemilik/Sudo yang dapat mencabut izin!", msg.MessageID, nil)
 		return
 	}
 
@@ -60,54 +60,54 @@ func (m *AuthorizeModule) HandleUnauthorize(ctx context.Context, peer tg.InputPe
 	u := m.userMap.GetOrCreate(targetID)
 	u.IsAuth = false
 	_ = ext.DB.SaveUser(u)
-	_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("× <b>Unauthorized:</b> <code>%d</code>", targetID), msg.MessageID, nil)
+	_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("× <b>Tidak Diizinkan:</b> <code>%d</code>", targetID), msg.MessageID, nil)
 }
 
 func (m *AuthorizeModule) HandleAddSudo(ctx context.Context, peer tg.InputPeerClass, msg *types.MessageContext) {
 	if !telegram.IsOwner(msg.UserID) {
-		_, _ = m.sender.SendMessage(ctx, peer, "Only Bot Owner can add Sudo!", msg.MessageID, nil)
+		_, _ = m.sender.SendMessage(ctx, peer, "Hanya Pemilik Bot yang dapat menambah Sudo!", msg.MessageID, nil)
 		return
 	}
 
 	targetID := extractTargetID(msg)
 	if targetID == 0 {
-		_, _ = m.sender.SendMessage(ctx, peer, "Give User ID or reply to a user message!", msg.MessageID, nil)
+		_, _ = m.sender.SendMessage(ctx, peer, "Berikan ID Pengguna atau balas pesan pengguna!", msg.MessageID, nil)
 		return
 	}
 
 	u := m.userMap.GetOrCreate(targetID)
 	u.IsSudo = true
 	_ = ext.DB.SaveUser(u)
-	_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("◈ <b>Promoted as Sudo:</b> <code>%d</code>", targetID), msg.MessageID, nil)
+	_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("◈ <b>Dipromosikan sebagai Sudo:</b> <code>%d</code>", targetID), msg.MessageID, nil)
 }
 
 func (m *AuthorizeModule) HandleRmSudo(ctx context.Context, peer tg.InputPeerClass, msg *types.MessageContext) {
 	if !telegram.IsOwner(msg.UserID) {
-		_, _ = m.sender.SendMessage(ctx, peer, "Only Bot Owner can remove Sudo!", msg.MessageID, nil)
+		_, _ = m.sender.SendMessage(ctx, peer, "Hanya Pemilik Bot yang dapat menghapus Sudo!", msg.MessageID, nil)
 		return
 	}
 
 	targetID := extractTargetID(msg)
 	if targetID == 0 {
-		_, _ = m.sender.SendMessage(ctx, peer, "Give User ID or reply to a user message!", msg.MessageID, nil)
+		_, _ = m.sender.SendMessage(ctx, peer, "Berikan ID Pengguna atau balas pesan pengguna!", msg.MessageID, nil)
 		return
 	}
 
 	u := m.userMap.GetOrCreate(targetID)
 	u.IsSudo = false
 	_ = ext.DB.SaveUser(u)
-	_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("× <b>Demoted from Sudo:</b> <code>%d</code>", targetID), msg.MessageID, nil)
+	_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("× <b>Diturunkan dari Sudo:</b> <code>%d</code>", targetID), msg.MessageID, nil)
 }
 
 func (m *AuthorizeModule) HandleAddPremium(ctx context.Context, peer tg.InputPeerClass, msg *types.MessageContext) {
 	if !telegram.IsOwner(msg.UserID) && !telegram.IsSudo(msg.UserID, m.userMap) {
-		_, _ = m.sender.SendMessage(ctx, peer, "Only Owner/Sudo can add Premium!", msg.MessageID, nil)
+		_, _ = m.sender.SendMessage(ctx, peer, "Hanya Pemilik/Sudo yang dapat menambah Premium!", msg.MessageID, nil)
 		return
 	}
 
 	targetID, durationSec := parsePremiumArgs(msg)
 	if targetID == 0 {
-		_, _ = m.sender.SendMessage(ctx, peer, "<b>Usage:</b> <code>/addpremium [user_id] [duration]</code> (e.g. <code>/addpremium 12345 30d</code>)", msg.MessageID, nil)
+		_, _ = m.sender.SendMessage(ctx, peer, "<b>Penggunaan:</b> <code>/addpremium [user_id] [duration]</code> (mis. <code>/addpremium 12345 30d</code>)", msg.MessageID, nil)
 		return
 	}
 
@@ -120,22 +120,22 @@ func (m *AuthorizeModule) HandleAddPremium(ctx context.Context, peer tg.InputPee
 	}
 	_ = ext.DB.SaveUser(u)
 
-	expiryStr := "Lifetime"
+	expiryStr := "Seumur hidup"
 	if u.ExpiryTime > 0 {
 		expiryStr = ext.GetReadableTime(durationSec)
 	}
-	_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("◈ <b>User Promoted to Premium!</b>\n• <b>User ID:</b> <code>%d</code>\n• <b>Duration:</b> <code>%s</code>\n• <b>Benefits:</b> 4GB upload, No token verification", targetID, expiryStr), msg.MessageID, nil)
+	_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("◈ <b>Pengguna Dipromosikan ke Premium!</b>\n• <b>ID Pengguna:</b> <code>%d</code>\n• <b>Durasi:</b> <code>%s</code>\n• <b>Manfaat:</b> unggah 4GB, tanpa verifikasi token", targetID, expiryStr), msg.MessageID, nil)
 }
 
 func (m *AuthorizeModule) HandleRmPremium(ctx context.Context, peer tg.InputPeerClass, msg *types.MessageContext) {
 	if !telegram.IsOwner(msg.UserID) && !telegram.IsSudo(msg.UserID, m.userMap) {
-		_, _ = m.sender.SendMessage(ctx, peer, "Only Owner/Sudo can remove Premium!", msg.MessageID, nil)
+		_, _ = m.sender.SendMessage(ctx, peer, "Hanya Pemilik/Sudo yang dapat menghapus Premium!", msg.MessageID, nil)
 		return
 	}
 
 	targetID := extractTargetID(msg)
 	if targetID == 0 {
-		_, _ = m.sender.SendMessage(ctx, peer, "Give User ID or reply to a user message!", msg.MessageID, nil)
+		_, _ = m.sender.SendMessage(ctx, peer, "Berikan ID Pengguna atau balas pesan pengguna!", msg.MessageID, nil)
 		return
 	}
 
@@ -143,7 +143,7 @@ func (m *AuthorizeModule) HandleRmPremium(ctx context.Context, peer tg.InputPeer
 	u.IsPremium = false
 	u.ExpiryTime = 0
 	_ = ext.DB.SaveUser(u)
-	_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("× <b>Premium Removed for:</b> <code>%d</code>", targetID), msg.MessageID, nil)
+	_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("× <b>Premium Dihapus untuk:</b> <code>%d</code>", targetID), msg.MessageID, nil)
 }
 
 func (m *AuthorizeModule) HandleCheckPremium(ctx context.Context, peer tg.InputPeerClass, msg *types.MessageContext) {
@@ -154,14 +154,14 @@ func (m *AuthorizeModule) HandleCheckPremium(ctx context.Context, peer tg.InputP
 
 	if telegram.IsPremium(targetID, m.userMap) {
 		u := m.userMap.Get(targetID)
-		remStr := "Lifetime"
+		remStr := "Seumur hidup"
 		if u != nil && u.ExpiryTime > 0 {
 			remSec := u.ExpiryTime - time.Now().Unix()
 			remStr = ext.GetReadableTime(remSec)
 		}
-		_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("◈ <b>Premium User Status:</b>\n• <b>User ID:</b> <code>%d</code>\n✓ <b>Status:</b> Active\n• <b>Remaining:</b> <code>%s</code>", targetID, remStr), msg.MessageID, nil)
+		_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("◈ <b>Status Pengguna Premium:</b>\n• <b>ID Pengguna:</b> <code>%d</code>\n✓ <b>Status:</b> Aktif\n• <b>Tersisa:</b> <code>%s</code>", targetID, remStr), msg.MessageID, nil)
 	} else {
-		_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("◈ <b>Premium User Status:</b>\n• <b>User ID:</b> <code>%d</code>\n× <b>Status:</b> Not Premium", targetID), msg.MessageID, nil)
+		_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("◈ <b>Status Pengguna Premium:</b>\n• <b>ID Pengguna:</b> <code>%d</code>\n× <b>Status:</b> Bukan Premium", targetID), msg.MessageID, nil)
 	}
 }
 

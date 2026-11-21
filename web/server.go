@@ -53,7 +53,7 @@ func handleFiles(w http.ResponseWriter, r *http.Request) {
 	id := strings.TrimPrefix(r.URL.Path, "/app/files/")
 	id = strings.TrimSpace(id)
 	if id == "" {
-		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		http.Error(w, "ID tidak valid", http.StatusBadRequest)
 		return
 	}
 
@@ -113,7 +113,7 @@ func handleFiles(w http.ResponseWriter, r *http.Request) {
 	if userPin != pinCode {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusUnauthorized)
-		_, _ = w.Write([]byte(`<h1 style="color:red;text-align:center;margin-top:20vh;font-family:sans-serif;">× Incorrect Security PIN Code</h1>`))
+		_, _ = w.Write([]byte(`<h1 style="color:red;text-align:center;margin-top:20vh;font-family:sans-serif;">× Kode PIN Keamanan Salah</h1>`))
 		return
 	}
 
@@ -137,7 +137,7 @@ func handleFiles(w http.ResponseWriter, r *http.Request) {
 	if contentHTML == "" {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte(`<h1 style="color:#a855f7;text-align:center;margin-top:20vh;font-family:sans-serif;">⌬ No files found or session expired for ID: ` + id + `</h1>`))
+		_, _ = w.Write([]byte(`<h1 style="color:#a855f7;text-align:center;margin-top:20vh;font-family:sans-serif;">⌬ Tidak ada berkas ditemukan atau sesi kedaluwarsa untuk ID: ` + id + `</h1>`))
 		return
 	}
 
@@ -150,11 +150,11 @@ func handleFiles(w http.ResponseWriter, r *http.Request) {
 }
 
 const homepageHTML = `<!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AZML-Go | Next Gen Leech Engine</title>
+    <title>AZML-Go | Mesin Leech Generasi Baru</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Exo:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -242,29 +242,29 @@ const homepageHTML = `<!DOCTYPE html>
 </head>
 <body>
     <div class="container">
-        <img class="logo" src="https://graph.org/file/1a6ad157f55bc42b548df.png" alt="AZML Logo">
-        <div><span class="version">AZML-Go Pure Edition</span></div>
+        <img class="logo" src="https://graph.org/file/1a6ad157f55bc42b548df.png" alt="Logo AZML">
+        <div><span class="version">AZML-Go Edisi Murni</span></div>
         <h1>AZML</h1>
-        <p class="subtitle">Next generation high-speed workflow automation powered by Go</p>
+        <p class="subtitle">Otomatisasi alur kerja berkecepatan tinggi generasi baru yang didukung oleh Go</p>
         <div class="links">
             <a href="https://t.me/CANON_BOTS" target="_blank" class="button">
-                <i class="fab fa-telegram-plane"></i> Telegram Channel
+                <i class="fab fa-telegram-plane"></i> Kanal Telegram
             </a>
             <a href="https://github.com/aquib4040/AZML" target="_blank" class="button">
-                <i class="fab fa-github"></i> GitHub Repository
+                <i class="fab fa-github"></i> Repositori GitHub
             </a>
         </div>
-        <p class="copyright">&copy; 2026 AZML-Go. All rights reserved.</p>
+        <p class="copyright">&copy; 2026 AZML-Go. Seluruh hak cipta dilindungi.</p>
     </div>
 </body>
 </html>`
 
 const codePageHTML = `<!DOCTYPE html>
-<html class="dark" lang="en">
+<html class="dark" lang="id">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Security Access - AZML Selector</title>
+    <title>Akses Keamanan - Pemilih AZML</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -282,14 +282,14 @@ const codePageHTML = `<!DOCTYPE html>
         <div class="w-16 h-16 mx-auto rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center mb-6">
             <span class="material-symbols-outlined text-purple-500 text-3xl">lock</span>
         </div>
-        <h1 class="text-2xl font-extrabold text-white mb-2">Authorization Required</h1>
-        <p class="text-zinc-400 mb-8 text-sm">Enter the 4-digit security PIN provided in Telegram to access your files.</p>
+        <h1 class="text-2xl font-extrabold text-white mb-2">Otorisasi Diperlukan</h1>
+        <p class="text-zinc-400 mb-8 text-sm">Masukkan PIN keamanan 4 digit yang diberikan di Telegram untuk mengakses berkas Anda.</p>
         <form action="{form_url}">
             <div class="mb-8">
                 <input 
                     type="text" 
                     name="pin_code"
-                    placeholder="Enter 4-digit PIN"
+                    placeholder="Masukkan PIN 4 digit"
                     class="w-full bg-black border border-zinc-700 rounded-xl px-6 py-4 text-center text-xl tracking-[0.5em] text-white focus:border-purple-500 focus:outline-none transition-all font-mono"
                     autocomplete="off"
                     maxlength="4"
@@ -297,7 +297,7 @@ const codePageHTML = `<!DOCTYPE html>
                 />
             </div>
             <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-                Authenticate
+                Autentikasi
             </button>
         </form>
     </div>
@@ -305,11 +305,11 @@ const codePageHTML = `<!DOCTYPE html>
 </html>`
 
 const pageHTML = `<!DOCTYPE html>
-<html class="dark" lang="en">
+<html class="dark" lang="id">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AZML File Selector</title>
+    <title>Pemilih Berkas AZML</title>
     <link rel="icon" href="https://graph.org/file/1a6ad157f55bc42b548df.png" type="image/jpg">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -362,7 +362,7 @@ const pageHTML = `<!DOCTYPE html>
         <header class="glass-card rounded-2xl p-3 sm:p-4 flex items-center justify-between shadow-xl">
             <div class="flex items-center gap-3">
                 <img class="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-purple-500/30" src="https://graph.org/file/1a6ad157f55bc42b548df.png" alt="logo" />
-                <h1 class="font-bold text-lg sm:text-xl tracking-tight text-white">AZML File Selection</h1>
+                <h1 class="font-bold text-lg sm:text-xl tracking-tight text-white">Pemilihan Berkas AZML</h1>
             </div>
             <div class="flex items-center gap-3 sm:gap-4 text-zinc-400">
                 <a href="https://t.me/CANON_BOTS" target="_blank" class="hover:text-purple-400 transition-colors"><span class="material-symbols-outlined text-lg sm:text-2xl">chat</span></a>
@@ -372,12 +372,12 @@ const pageHTML = `<!DOCTYPE html>
         <!-- Stats Panel -->
         <div id="sticks" class="glass-card rounded-2xl p-3 sm:p-5 flex flex-row justify-around items-center gap-2 sm:gap-4 text-center shadow-lg transition-all z-50">
             <div>
-                <span class="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-400">Selected Files</span>
+                <span class="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-400">Berkas Dipilih</span>
                 <h4 class="text-base sm:text-lg font-bold text-purple-400 mt-0.5 sm:mt-1"><span id="checked_files">0</span> / <span id="total_files">0</span></h4>
             </div>
             <div class="w-[1px] h-8 bg-zinc-800"></div>
             <div>
-                <span class="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-400">Selected Size</span>
+                <span class="text-[10px] sm:text-xs uppercase tracking-wider text-zinc-400">Ukuran Dipilih</span>
                 <h4 class="text-base sm:text-lg font-bold text-purple-400 mt-0.5 sm:mt-1"><span id="checked_size">0</span> / <span id="total_size">0</span></h4>
             </div>
         </div>
@@ -389,7 +389,7 @@ const pageHTML = `<!DOCTYPE html>
                     {My_content}
                 </div>
                 <button type="submit" class="self-center w-full sm:w-1/2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 sm:py-3.5 rounded-xl transition-all shadow-[0_0_20px_rgba(168,85,247,0.2)] text-sm sm:text-base">
-                    Confirm Selection
+                    Konfirmasi Pilihan
                 </button>
             </form>
         </section>
@@ -399,7 +399,7 @@ const pageHTML = `<!DOCTYPE html>
     <script>
         function s_validate() {
             if ($("input[type='checkbox'][name^='filenode_']:checked").length == 0) {
-                alert("Select at least one file!");
+                alert("Pilih setidaknya satu berkas!");
                 return false;
             }
         }

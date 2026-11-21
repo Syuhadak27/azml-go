@@ -322,7 +322,7 @@ func saveBigFilePartWithRetry(ctx context.Context, clients []*tg.Client, workerI
 		if d, ok := tgerr.AsFloodWait(err); ok {
 			floodWaitAttempts++
 			if floodWaitAttempts > 10 {
-				return fmt.Errorf("flood wait exceeded for part %d: %w", partIndex, err)
+				return fmt.Errorf("flood wait terlampaui untuk bagian %d: %w", partIndex, err)
 			}
 			if floodCoord != nil {
 				floodCoord.HandleFloodWait(d, partIndex, totalParts)
@@ -359,7 +359,7 @@ func saveBigFilePartWithRetry(ctx context.Context, clients []*tg.Client, workerI
 		log.Printf("[AZML-Go Uploader] Fatal error uploading part %d: %v", partIndex, err)
 		return err
 	}
-	return fmt.Errorf("exceeded max retries (%d) for part %d", maxAttempts, partIndex)
+	return fmt.Errorf("melebihi percobaan ulang maksimum (%d) untuk bagian %d", maxAttempts, partIndex)
 }
 
 func (u *TelegramUploader) uploadVideoCover(ctx context.Context, client *tg.Client, peer tg.InputPeerClass, coverPath string) (tg.InputPhotoClass, error) {
@@ -373,7 +373,7 @@ func (u *TelegramUploader) uploadVideoCover(ctx context.Context, client *tg.Clie
 	coverUp := uploader.NewUploader(client).WithPartSize(512 * 1024)
 	coverFile, err := coverUp.FromPath(ctx, coverPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to upload cover file: %w", err)
+		return nil, fmt.Errorf("gagal mengunggah berkas sampul: %w", err)
 	}
 
 	var uploadPeer tg.InputPeerClass = peer
@@ -441,7 +441,7 @@ func (u *TelegramUploader) UploadFile(ctx context.Context, peer tg.InputPeerClas
 		maxLimit = int64(4194304000)
 	}
 	if fileSize > maxLimit {
-		return nil, fmt.Errorf("file size %s exceeds maximum upload limit", ext.GetReadableFileSize(fileSize))
+		return nil, fmt.Errorf("ukuran berkas %s melebihi batas unggah maksimum", ext.GetReadableFileSize(fileSize))
 	}
 
 	const twoGB = int64(2097152000)
@@ -483,7 +483,7 @@ func (u *TelegramUploader) UploadFile(ctx context.Context, peer tg.InputPeerClas
 	var targetUploadChatID int64
 	if fileSize > twoGB {
 		if u.userClient == nil || u.userUp == nil {
-			return nil, fmt.Errorf("file size %s exceeds 2GB limit; USER_SESSION_STRING is required to upload files > 2GB (up to 4GB)", ext.GetReadableFileSize(fileSize))
+			return nil, fmt.Errorf("ukuran berkas %s melebihi batas 2GB; USER_SESSION_STRING diperlukan untuk mengunggah berkas > 2GB (hingga 4GB)", ext.GetReadableFileSize(fileSize))
 		}
 		clientToUse = u.userClient
 		// When uploading with user session string (>2GB files):
@@ -565,13 +565,13 @@ func (u *TelegramUploader) UploadFile(ctx context.Context, peer tg.InputPeerClas
 				break
 			}
 			if ctx.Err() != nil {
-				return nil, fmt.Errorf("upload cancelled: %v", ctx.Err())
+				return nil, fmt.Errorf("unggahan dibatalkan: %v", ctx.Err())
 			}
 			log.Printf("[AZML-Go Uploader] Upload attempt %d failed for %s: %v. Retrying in 1s...", attempt, opt.FileName, err)
 			time.Sleep(1 * time.Second)
 		}
 		if err != nil {
-			return nil, fmt.Errorf("failed to upload small file parts: %v", err)
+			return nil, fmt.Errorf("gagal mengunggah bagian berkas kecil: %v", err)
 		}
 	} else {
 		// Large file (>= 10 MB): Multi-worker chunk uploader with per-part retries (handles broken pipe seamlessly)
@@ -581,7 +581,7 @@ func (u *TelegramUploader) UploadFile(ctx context.Context, peer tg.InputPeerClas
 
 		f, openErr := os.Open(opt.FilePath)
 		if openErr != nil {
-			return nil, fmt.Errorf("failed to open file for parallel upload: %w", openErr)
+			return nil, fmt.Errorf("gagal membuka berkas untuk unggahan paralel: %w", openErr)
 		}
 		defer f.Close()
 
@@ -654,7 +654,7 @@ func (u *TelegramUploader) UploadFile(ctx context.Context, peer tg.InputPeerClas
 					n, rErr := f.ReadAt(workerBuf[:pLen], off)
 					if rErr != nil && rErr != io.EOF {
 						errOnce.Do(func() {
-							firstErr = fmt.Errorf("failed to read part %d: %w", partIndex, rErr)
+							firstErr = fmt.Errorf("gagal membaca bagian %d: %w", partIndex, rErr)
 						})
 						return
 					}
@@ -662,7 +662,7 @@ func (u *TelegramUploader) UploadFile(ctx context.Context, peer tg.InputPeerClas
 					saveErr := saveBigFilePartWithRetry(ctx, uploadClients, workerID, fileID, int(partIndex), int(totalParts), workerBuf[:n], floodCoord)
 					if saveErr != nil {
 						errOnce.Do(func() {
-							firstErr = fmt.Errorf("UploadSaveBigFilePart failed for part %d: %w", partIndex, saveErr)
+							firstErr = fmt.Errorf("UploadSaveBigFilePart gagal untuk bagian %d: %w", partIndex, saveErr)
 						})
 						return
 					}
@@ -932,7 +932,7 @@ func (u *TelegramUploader) UploadFile(ctx context.Context, peer tg.InputPeerClas
 	}
 	if sendErr != nil {
 		log.Printf("[AZML-Go Uploader] MessagesSendMedia FAILED for %s (%d bytes) to peer %T: %v", opt.FileName, fileSize, uploadPeer, sendErr)
-		return nil, fmt.Errorf("failed to send uploaded media: %v", sendErr)
+		return nil, fmt.Errorf("gagal mengirim media yang diunggah: %v", sendErr)
 	}
 	log.Printf("[AZML-Go Uploader] Successfully sent uploaded media for %s to peer %T!", opt.FileName, uploadPeer)
 

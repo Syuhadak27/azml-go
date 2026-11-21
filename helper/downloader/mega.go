@@ -118,10 +118,10 @@ func (m *MegaDownloader) Download(ctx context.Context, megaURL, outDir string, o
 	aria := GetAria2Client()
 	gid, err := aria.AddURI(megaURL, outDir, "", nil)
 	if err != nil {
-		return "", fmt.Errorf("failed to start mega download via aria2c: %v", err)
+		return "", fmt.Errorf("gagal memulai unduhan mega via aria2c: %v", err)
 	}
 
-	task := NewAria2DownloadTask(gid, "Mega Download", outDir, 0, 0, 0)
+	task := NewAria2DownloadTask(gid, "Unduhan Mega", outDir, 0, 0, 0)
 	return task.PollUntilComplete(ctx, func(c, t int64) {
 		if onProgress != nil {
 			onProgress(c, t, task.Speed(), task.ETA())

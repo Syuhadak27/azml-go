@@ -127,28 +127,28 @@ func CheckTaskLimits(userID int64, size int64, taskType string, isExtract, isCom
 			if cfg.TorrentLimit > 0 {
 				limitBytes = cfg.TorrentLimit * 1024 * 1024 * 1024
 				if size > limitBytes {
-					return fmt.Sprintf("Torrent limit is %s.\nYour task size is %s.", GetReadableFileSize(limitBytes), GetReadableFileSize(size))
+					return fmt.Sprintf("Batas Torrent adalah %s.\nUkuran tugas Anda adalah %s.", GetReadableFileSize(limitBytes), GetReadableFileSize(size))
 				}
 			}
 		case "direct", "ddl":
 			if cfg.DirectLimit > 0 {
 				limitBytes = cfg.DirectLimit * 1024 * 1024 * 1024
 				if size > limitBytes {
-					return fmt.Sprintf("Direct download limit is %s.\nYour task size is %s.", GetReadableFileSize(limitBytes), GetReadableFileSize(size))
+					return fmt.Sprintf("Batas unduh langsung adalah %s.\nUkuran tugas Anda adalah %s.", GetReadableFileSize(limitBytes), GetReadableFileSize(size))
 				}
 			}
 		case "ytdl", "ytdlp":
 			if cfg.YtdlpLimit > 0 {
 				limitBytes = cfg.YtdlpLimit * 1024 * 1024 * 1024
 				if size > limitBytes {
-					return fmt.Sprintf("YT-DLP limit is %s.\nYour task size is %s.", GetReadableFileSize(limitBytes), GetReadableFileSize(size))
+					return fmt.Sprintf("Batas YT-DLP adalah %s.\nUkuran tugas Anda adalah %s.", GetReadableFileSize(limitBytes), GetReadableFileSize(size))
 				}
 			}
 		case "mega":
 			if cfg.MegaLimit > 0 {
 				limitBytes = cfg.MegaLimit * 1024 * 1024 * 1024
 				if size > limitBytes {
-					return fmt.Sprintf("Mega limit is %s.\nYour task size is %s.", GetReadableFileSize(limitBytes), GetReadableFileSize(size))
+					return fmt.Sprintf("Batas Mega adalah %s.\nUkuran tugas Anda adalah %s.", GetReadableFileSize(limitBytes), GetReadableFileSize(size))
 				}
 			}
 		}
@@ -157,7 +157,7 @@ func CheckTaskLimits(userID int64, size int64, taskType string, isExtract, isCom
 		if cfg.LeechLimit > 0 {
 			leechMax := cfg.LeechLimit * 1024 * 1024 * 1024
 			if size > leechMax {
-				return fmt.Sprintf("Leech limit is %s.\nYour task size is %s.", GetReadableFileSize(leechMax), GetReadableFileSize(size))
+				return fmt.Sprintf("Batas Leech adalah %s.\nUkuran tugas Anda adalah %s.", GetReadableFileSize(leechMax), GetReadableFileSize(size))
 			}
 		}
 
@@ -165,34 +165,34 @@ func CheckTaskLimits(userID int64, size int64, taskType string, isExtract, isCom
 		if isExtract && cfg.ExtractLimit > 0 {
 			extMax := cfg.ExtractLimit * 1024 * 1024 * 1024
 			if size > extMax {
-				return fmt.Sprintf("Extraction limit is %s.\nYour task size is %s.", GetReadableFileSize(extMax), GetReadableFileSize(size))
+				return fmt.Sprintf("Batas ekstraksi adalah %s.\nUkuran tugas Anda adalah %s.", GetReadableFileSize(extMax), GetReadableFileSize(size))
 			}
 		}
 		if isCompress && cfg.ArchiveLimit > 0 {
 			archMax := cfg.ArchiveLimit * 1024 * 1024 * 1024
 			if size > archMax {
-				return fmt.Sprintf("Archive compression limit is %s.\nYour task size is %s.", GetReadableFileSize(archMax), GetReadableFileSize(size))
+				return fmt.Sprintf("Batas kompresi arsip adalah %s.\nUkuran tugas Anda adalah %s.", GetReadableFileSize(archMax), GetReadableFileSize(size))
 			}
 		}
 
 		// 2. Storage Threshold Check (ensure server disk doesn't fill up)
 		if !CheckStorageThreshold(size, isExtract || isCompress) {
 			thresholdStr := GetReadableFileSize(cfg.StorageThreshold * 1024 * 1024 * 1024)
-			return fmt.Sprintf("Storage threshold reached! Must leave %s free storage on server.", thresholdStr)
+			return fmt.Sprintf("Ambang penyimpanan tercapai! Harus menyisakan %s ruang penyimpanan kosong di server.", thresholdStr)
 		}
 	}
 
 	// 3. Daily Task Count Limit
 	tasksToday, bytesToday := GetUserDailyStats(userID)
 	if cfg.DailyTaskLimit > 0 && tasksToday >= cfg.DailyTaskLimit {
-		return fmt.Sprintf("Daily Task Limit is %d tasks.\nYou have exhausted your daily task limit for today.", cfg.DailyTaskLimit)
+		return fmt.Sprintf("Batas Tugas Harian adalah %d tugas.\nAnda telah menggunakan seluruh batas tugas harian untuk hari ini.", cfg.DailyTaskLimit)
 	}
 
 	// 4. Daily Leech Data Limit
 	if cfg.DailyLeechLimit > 0 && size > 0 {
 		dailyMaxBytes := cfg.DailyLeechLimit * 1024 * 1024 * 1024
 		if (bytesToday + size) > dailyMaxBytes {
-			return fmt.Sprintf("Daily Leech Limit is %s.\nYou have used %s today. This task would exceed your daily limit.",
+			return fmt.Sprintf("Batas Leech Harian adalah %s.\nAnda telah menggunakan %s hari ini. Tugas ini akan melebihi batas harian Anda.",
 				GetReadableFileSize(dailyMaxBytes), GetReadableFileSize(bytesToday))
 		}
 	}

@@ -70,7 +70,7 @@ func (d *DirectDownloader) Download(ctx context.Context, link, outPath string, o
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("bad HTTP status: %s", resp.Status)
+		return fmt.Errorf("status HTTP tidak valid: %s", resp.Status)
 	}
 
 	_ = os.MkdirAll(filepath.Dir(outPath), 0755)

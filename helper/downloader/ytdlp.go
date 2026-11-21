@@ -128,7 +128,7 @@ func (y *YtDlpDownloader) Download(ctx context.Context, link, outDir, customForm
 		return filepath.Join(outDir, files[0].Name()), nil
 	}
 
-	return "", errors.New("yt-dlp completed but output file not found")
+	return "", errors.New("yt-dlp selesai tetapi berkas keluaran tidak ditemukan")
 }
 
 func parseBytes(val float64, unit string) int64 {

@@ -105,7 +105,7 @@ type ExtractedMeta struct {
 
 func ExtractMetadataFromFilename(filename string) ExtractedMeta {
 	meta := ExtractedMeta{
-		Title:   "Unknown",
+		Title:   "Tidak diketahui",
 		Season:  "01",
 		Episode: "01",
 		Quality: "1080p",
@@ -541,7 +541,7 @@ func splitVideo(filePath string, totalSize int64, splitSize int64, duration int,
 				partPath, "-y",
 			)
 			if rErr := cmdRetry.Run(); rErr != nil {
-				return nil, fmt.Errorf("ffmpeg split failed on part %d: %w", partIdx, rErr)
+				return nil, fmt.Errorf("pemotongan ffmpeg gagal pada bagian %d: %w", partIdx, rErr)
 			}
 		}
 
@@ -553,7 +553,7 @@ func splitVideo(filePath string, totalSize int64, splitSize int64, duration int,
 
 		pDetails, pErr := ProbeMedia(partPath)
 		if pErr != nil || pDetails.Duration <= 0 {
-			return nil, fmt.Errorf("could not probe part %d duration", partIdx)
+			return nil, fmt.Errorf("tidak dapat memeriksa durasi bagian %d", partIdx)
 		}
 
 		// If duration of trailing keyframe fragment is negligible (<= 3s), drop it
@@ -580,7 +580,7 @@ func splitVideo(filePath string, totalSize int64, splitSize int64, duration int,
 	if len(parts) > 1 {
 		return parts, nil
 	}
-	return nil, fmt.Errorf("size-based video split produced %d parts, expected > 1", len(parts))
+	return nil, fmt.Errorf("pemotongan video berdasarkan ukuran menghasilkan %d bagian, diharapkan > 1", len(parts))
 }
 
 func splitBinary(filePath string, maxSplitSize int64, outDir string) ([]string, error) {
@@ -686,7 +686,7 @@ func uploadToTelegraph(filePath string) (string, error) {
 	if json.NewDecoder(resp.Body).Decode(&res) == nil && len(res) > 0 {
 		return "https://graph.org" + res[0].Src, nil
 	}
-	return "", errors.New("failed to upload image to telegraph")
+	return "", errors.New("gagal mengunggah gambar ke telegraph")
 }
 
 func GenerateThumbnail(filePath, customThumbPath string) string {

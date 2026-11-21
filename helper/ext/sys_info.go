@@ -219,20 +219,20 @@ func RenderBotStats(startTime time.Time) string {
 
 	appRAM := GetAppMemoryUsageMB()
 
-	return fmt.Sprintf("⌬ <b><i>BOT STATISTICS :</i></b>\n"+
-		"┖ <b>Bot Uptime :</b> %s\n\n"+
-		"┎ <b><i>RAM ( MEMORY ) :</i></b>\n"+
+	return fmt.Sprintf("⌬ <b><i>STATISTIK BOT :</i></b>\n"+
+		"┖ <b>Waktu Aktif Bot :</b> %s\n\n"+
+		"┎ <b><i>RAM ( MEMORI ) :</i></b>\n"+
 		"┃ %s %.1f%%\n"+
-		"┠ <b>App RAM (AZML-Go) :</b> <code>%.1f MB</code>\n"+
-		"┖ <b>U :</b> %s | <b>F :</b> %s | <b>T :</b> %s\n\n"+
-		"┎ <b><i>SWAP MEMORY :</i></b>\n"+
+		"┠ <b>RAM Aplikasi (AZML-Go) :</b> <code>%.1f MB</code>\n"+
+		"┖ <b>Digunakan :</b> %s | <b>Tersedia :</b> %s | <b>Total :</b> %s\n\n"+
+		"┎ <b><i>MEMORI SWAP :</i></b>\n"+
 		"┃ %s %.1f%%\n"+
-		"┖ <b>U :</b> %s | <b>F :</b> %s | <b>T :</b> %s\n\n"+
+		"┖ <b>Digunakan :</b> %s | <b>Tersedia :</b> %s | <b>Total :</b> %s\n\n"+
 		"┎ <b><i>DISK :</i></b>\n"+
 		"┃ %s %.1f%%\n"+
-		"┃ <b>Total Disk Read :</b> %s\n"+
-		"┃ <b>Total Disk Write :</b> %s\n"+
-		"┖ <b>U :</b> %s | <b>F :</b> %s | <b>T :</b> %s",
+		"┃ <b>Total Pembacaan Disk :</b> %s\n"+
+		"┃ <b>Total Penulisan Disk :</b> %s\n"+
+		"┖ <b>Digunakan :</b> %s | <b>Tersedia :</b> %s | <b>Total :</b> %s",
 		botUptime,
 		ramBar, ramPercent,
 		appRAM,
@@ -247,7 +247,7 @@ func RenderBotStats(startTime time.Time) string {
 func getDiskIOCounters() (string, string) {
 	f, err := os.Open("/proc/diskstats")
 	if err != nil {
-		return "Access Denied", "Access Denied"
+		return "Akses Ditolak", "Akses Ditolak"
 	}
 	defer f.Close()
 
@@ -274,7 +274,7 @@ func getDiskIOCounters() (string, string) {
 	}
 
 	if totalReadSectors == 0 && totalWriteSectors == 0 {
-		return "Access Denied", "Access Denied"
+		return "Akses Ditolak", "Akses Ditolak"
 	}
 
 	readBytes := totalReadSectors * 512
@@ -348,7 +348,7 @@ func getCPUPercent() float64 {
 // RenderSysStats produces the exact Python SYS_STATS theme output
 func RenderSysStats() string {
 	// OS Uptime
-	osUptime := "N/A"
+	osUptime := "Tidak tersedia"
 	if data, err := os.ReadFile("/proc/uptime"); err == nil {
 		fields := strings.Fields(string(data))
 		if len(fields) > 0 {
@@ -417,7 +417,7 @@ func RenderSysStats() string {
 	cpuBar := GetProgressBarString(cpuUsage)
 
 	// CPU Frequency
-	cpuFreq := "Access Denied"
+	cpuFreq := "Akses Ditolak"
 	if data, err := os.ReadFile("/proc/cpuinfo"); err == nil {
 		for _, line := range strings.Split(string(data), "\n") {
 			if strings.HasPrefix(strings.TrimSpace(line), "cpu MHz") {
@@ -433,7 +433,7 @@ func RenderSysStats() string {
 	}
 
 	// System Load
-	sysLoad := "N/A"
+	sysLoad := "Tidak tersedia"
 	if data, err := os.ReadFile("/proc/loadavg"); err == nil {
 		fields := strings.Fields(string(data))
 		if len(fields) >= 3 {
@@ -456,23 +456,23 @@ func RenderSysStats() string {
 	}
 	vCores := totalCores - pCores
 
-	return fmt.Sprintf("⌬ <b><i>OS SYSTEM :</i></b>\n"+
-		"┠ <b>OS Uptime :</b> %s\n"+
-		"┠ <b>OS Version :</b> %s\n"+
-		"┖ <b>OS Arch :</b> %s\n\n"+
-		"⌬ <b><i>NETWORK STATS :</i></b>\n"+
-		"┠ <b>Upload Data:</b> %s\n"+
-		"┠ <b>Download Data:</b> %s\n"+
-		"┠ <b>Pkts Sent:</b> %sk\n"+
-		"┠ <b>Pkts Received:</b> %sk\n"+
-		"┖ <b>Total I/O Data:</b> %s\n\n"+
+	return fmt.Sprintf("⌬ <b><i>SISTEM OS :</i></b>\n"+
+		"┠ <b>Waktu Aktif OS :</b> %s\n"+
+		"┠ <b>Versi OS :</b> %s\n"+
+		"┖ <b>Arsitektur OS :</b> %s\n\n"+
+		"⌬ <b><i>STATISTIK JARINGAN :</i></b>\n"+
+		"┠ <b>Data Unggah:</b> %s\n"+
+		"┠ <b>Data Unduh:</b> %s\n"+
+		"┠ <b>Paket Terkirim:</b> %sk\n"+
+		"┠ <b>Paket Diterima:</b> %sk\n"+
+		"┖ <b>Total Data I/O:</b> %s\n\n"+
 		"┎ <b>CPU :</b>\n"+
 		"┃ %s %.1f%%\n"+
-		"┠ <b>CPU Frequency :</b> %s\n"+
-		"┠ <b>System Avg Load :</b> %s\n"+
+		"┠ <b>Frekuensi CPU :</b> %s\n"+
+		"┠ <b>Beban Rata-rata Sistem :</b> %s\n"+
 		"┠ <b>P-Core(s) :</b> %d | <b>V-Core(s) :</b> %d\n"+
 		"┠ <b>Total Core(s) :</b> %d\n"+
-		"┖ <b>Usable CPU(s) :</b> %d",
+		"┖ <b>CPU yang Dapat Digunakan :</b> %d",
 		osUptime, osVersion, osArch,
 		upData, dlData, pktSent, pktRecv, tlData,
 		cpuBar, cpuUsage,
@@ -482,8 +482,8 @@ func RenderSysStats() string {
 
 // RenderRepoStats produces the exact Python REPO_STATS theme output
 func RenderRepoStats() string {
-	lastCommit := "N/A"
-	changeLog := "<code>Latest updates and improvements</code> <b>By</b> AZML"
+	lastCommit := "Tidak tersedia"
+	changeLog := "<code>Pembaruan dan perbaikan terbaru</code> <b>Oleh</b> AZML"
 
 	// Try reading git log
 	cmdCommit := exec.Command("git", "log", "-1", "--pretty=format:%cd ( %cr )", "--date=format-local:%d/%m/%Y")
@@ -491,25 +491,25 @@ func RenderRepoStats() string {
 		lastCommit = strings.TrimSpace(string(out))
 	}
 
-	cmdLog := exec.Command("git", "log", "-1", "--pretty=format:<code>%s</code> <b>By</b> %an")
+	cmdLog := exec.Command("git", "log", "-1", "--pretty=format:<code>%s</code> <b>Oleh</b> %an")
 	if out, err := cmdLog.Output(); err == nil && len(out) > 0 {
 		changeLog = strings.TrimSpace(string(out))
 	}
 
-	if lastCommit == "N/A" {
-		lastCommit = fmt.Sprintf("%s ( Recent )", time.Now().Format("02/01/2006"))
+	if lastCommit == "Tidak tersedia" {
+		lastCommit = fmt.Sprintf("%s ( Terbaru )", time.Now().Format("02/01/2006"))
 	}
 
 	botVersion := "v2.0-Go"
 	latVersion := "v2.0"
-	remarks := "Up to date!"
+	remarks := "Sudah terbaru!"
 
-	return fmt.Sprintf("⌬ <b><i>REPO STATISTICS :</i></b>\n"+
-		"┠ <b>Bot Updated :</b> %s\n"+
-		"┠ <b>Current Version :</b> %s\n"+
-		"┠ <b>Latest Version :</b> %s\n"+
-		"┖ <b>Last ChangeLog :</b> %s\n\n"+
-		"⌬ <b>REMARKS :</b> <code>%s</code>",
+	return fmt.Sprintf("⌬ <b><i>STATISTIK REPO :</i></b>\n"+
+		"┠ <b>Bot Diperbarui :</b> %s\n"+
+		"┠ <b>Versi Saat Ini :</b> %s\n"+
+		"┠ <b>Versi Terbaru :</b> %s\n"+
+		"┖ <b>Log Perubahan Terakhir :</b> %s\n\n"+
+		"⌬ <b>CATATAN :</b> <code>%s</code>",
 		lastCommit, botVersion, latVersion, changeLog, remarks)
 }
 
@@ -560,7 +560,7 @@ func RenderBotLimits() string {
 		st = fmt.Sprintf("%d", cfg.StorageThreshold)
 	}
 
-	tv := "Disabled"
+	tv := "Nonaktif"
 	if cfg.TokenTimeout > 0 {
 		tv = GetReadableTime(cfg.TokenTimeout)
 	}
@@ -580,18 +580,18 @@ func RenderBotLimits() string {
 		bt = fmt.Sprintf("%d", cfg.QueueAll)
 	}
 
-	return fmt.Sprintf("⌬ <b><i>BOT LIMITATIONS :</i></b>\n"+
-		"┠ <b>Direct Limit :</b> %s GB\n"+
-		"┠ <b>Torrent Limit :</b> %s GB\n"+
-		"┠ <b>YT-DLP Limit :</b> %s GB\n"+
-		"┠ <b>Mega Limit :</b> %s GB\n"+
-		"┠ <b>Archive Limit :</b> %s GB\n"+
-		"┠ <b>Extract Limit :</b> %s GB\n"+
-		"┠ <b>Daily Leech Limit :</b> %s\n"+
-		"┠ <b>Storage Threshold :</b> %s GB\n"+
-		"┖ <b>Leech Limit :</b> %s GB\n\n"+
-		"┎ <b>Token Validity :</b> %s\n"+
-		"┠ <b>User Parallel Tasks :</b> %s\n"+
-		"┖ <b>Bot Parallel Tasks :</b> %s",
+	return fmt.Sprintf("⌬ <b><i>BATASAN BOT :</i></b>\n"+
+		"┠ <b>Batas Unduh Langsung :</b> %s GB\n"+
+		"┠ <b>Batas Torrent :</b> %s GB\n"+
+		"┠ <b>Batas YT-DLP :</b> %s GB\n"+
+		"┠ <b>Batas Mega :</b> %s GB\n"+
+		"┠ <b>Batas Arsip :</b> %s GB\n"+
+		"┠ <b>Batas Ekstraksi :</b> %s GB\n"+
+		"┠ <b>Batas Leech Harian :</b> %s\n"+
+		"┠ <b>Ambang Penyimpanan :</b> %s GB\n"+
+		"┖ <b>Batas Leech :</b> %s GB\n\n"+
+		"┎ <b>Masa Berlaku Token :</b> %s\n"+
+		"┠ <b>Tugas Paralel Pengguna :</b> %s\n"+
+		"┖ <b>Tugas Paralel Bot :</b> %s",
 		dl, tl, yl, ml, al, el, daily, st, ll, tv, ut, bt)
 }

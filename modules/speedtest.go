@@ -58,7 +58,7 @@ type speedtestResult struct {
 }
 
 func (m *SpeedtestModule) HandleSpeedtest(ctx context.Context, peer tg.InputPeerClass, msg *types.MessageContext) {
-	waitID, err := m.sender.SendMessage(ctx, peer, "<i>Initiating Speedtest...</i>", msg.MessageID, nil)
+	waitID, err := m.sender.SendMessage(ctx, peer, "<i>Memulai Speedtest...</i>", msg.MessageID, nil)
 	if err != nil || waitID <= 0 {
 		return
 	}
@@ -95,32 +95,32 @@ func (m *SpeedtestModule) HandleSpeedtest(ctx context.Context, peer tg.InputPeer
 			res, nErr = m.runNativeSpeedtest(testCtx)
 			if nErr != nil {
 				log.Printf("[AZML-Go Speedtest] Native speedtest error: %v", nErr)
-				_ = m.sender.EditMessage(ctx, peer, waitID, "<b>ERROR:</b> <i>Can't connect to Server at the Moment, Try Again Later !</i>", nil)
+				_ = m.sender.EditMessage(ctx, peer, waitID, "<b>KESALAHAN:</b> <i>Tidak dapat terhubung ke server saat ini, coba lagi nanti!</i>", nil)
 				return
 			}
 		}
 
-		caption := fmt.Sprintf("➲ <b><i>SPEEDTEST INFO</i></b>\n"+
-			"┠ <b>Upload:</b> <code>%s/s</code>\n"+
-			"┠ <b>Download:</b>  <code>%s/s</code>\n"+
+		caption := fmt.Sprintf("➲ <b><i>INFORMASI SPEEDTEST</i></b>\n"+
+			"┠ <b>Unggah:</b> <code>%s/s</code>\n"+
+			"┠ <b>Unduh:</b>  <code>%s/s</code>\n"+
 			"┠ <b>Ping:</b> <code>%.2f ms</code>\n"+
-			"┠ <b>Time:</b> <code>%s</code>\n"+
-			"┠ <b>Data Sent:</b> <code>%s</code>\n"+
-			"┖ <b>Data Received:</b> <code>%s</code>\n\n"+
-			"➲ <b><i>SPEEDTEST SERVER</i></b>\n"+
-			"┠ <b>Name:</b> <code>%s</code>\n"+
-			"┠ <b>Country:</b> <code>%s, %s</code>\n"+
+			"┠ <b>Waktu:</b> <code>%s</code>\n"+
+			"┠ <b>Data Terkirim:</b> <code>%s</code>\n"+
+			"┖ <b>Data Diterima:</b> <code>%s</code>\n\n"+
+			"➲ <b><i>SERVER SPEEDTEST</i></b>\n"+
+			"┠ <b>Nama:</b> <code>%s</code>\n"+
+			"┠ <b>Negara:</b> <code>%s, %s</code>\n"+
 			"┠ <b>Sponsor:</b> <code>%s</code>\n"+
-			"┠ <b>Latency:</b> <code>%.2f</code>\n"+
-			"┠ <b>Latitude:</b> <code>%s</code>\n"+
-			"┖ <b>Longitude:</b> <code>%s</code>\n\n"+
-			"➲ <b><i>CLIENT DETAILS</i></b>\n"+
-			"┠ <b>IP Address:</b> <code>%s</code>\n"+
-			"┠ <b>Latitude:</b> <code>%s</code>\n"+
-			"┠ <b>Longitude:</b> <code>%s</code>\n"+
-			"┠ <b>Country:</b> <code>%s</code>\n"+
+			"┠ <b>Latensi:</b> <code>%.2f</code>\n"+
+			"┠ <b>Lintang:</b> <code>%s</code>\n"+
+			"┖ <b>Bujur:</b> <code>%s</code>\n\n"+
+			"➲ <b><i>DETAIL KLIEN</i></b>\n"+
+			"┠ <b>Alamat IP:</b> <code>%s</code>\n"+
+			"┠ <b>Lintang:</b> <code>%s</code>\n"+
+			"┠ <b>Bujur:</b> <code>%s</code>\n"+
+			"┠ <b>Negara:</b> <code>%s</code>\n"+
 			"┠ <b>ISP:</b> <code>%s</code>\n"+
-			"┖ <b>ISP Rating:</b> <code>%s</code>",
+			"┖ <b>Rating ISP:</b> <code>%s</code>",
 			ext.GetReadableFileSize(int64(res.Upload/8)),
 			ext.GetReadableFileSize(int64(res.Download/8)),
 			res.Ping,
@@ -157,9 +157,9 @@ func (m *SpeedtestModule) HandleSpeedtest(ctx context.Context, peer tg.InputPeer
 
 func (m *SpeedtestModule) runNativeSpeedtest(ctx context.Context) (*speedtestResult, error) {
 	clientInfo := speedtestClientInfo{
-		IP:        "Unknown",
-		Country:   "Unknown",
-		ISP:       "Unknown",
+		IP:        "Tidak diketahui",
+		Country:   "Tidak diketahui",
+		ISP:       "Tidak diketahui",
 		ISPRating: "3.7",
 	}
 

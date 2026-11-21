@@ -510,7 +510,7 @@ func (b *BotApp) routeMessage(ctx context.Context, m *tg.Message, entities tg.En
 
 	chatID := getPeerID(m.PeerID)
 	senderID := chatID
-	senderName := "User"
+	senderName := "Pengguna"
 	senderUsername := ""
 
 	if m.FromID != nil {
@@ -712,7 +712,7 @@ func (b *BotApp) routeMessage(ctx context.Context, m *tg.Message, entities tg.En
 	// 5. Authorization check for leech, admin, settings, and task commands
 	if !telegram.IsAuthorized(chatID, senderID, b.userMap) {
 		log.Printf("[AZML-Go] Unauthorized command %q by user %d in chat %d", text, senderID, chatID)
-		sentID, _ := b.sender.SendMessage(ctx, peer, "⌬ <b>Access Denied!</b>\nYou are not authorized to use this bot.\nContact the bot owner to get authorization.", m.ID, nil)
+		sentID, _ := b.sender.SendMessage(ctx, peer, "⌬ <b>Akses Ditolak!</b>\nAnda tidak diizinkan menggunakan bot ini.\nHubungi pemilik bot untuk mendapatkan otorisasi.", m.ID, nil)
 		if sentID > 0 {
 			switch m.PeerID.(type) {
 			case *tg.PeerChat, *tg.PeerChannel:
@@ -738,8 +738,8 @@ func (b *BotApp) routeMessage(ctx context.Context, m *tg.Message, entities tg.En
 				botUser = telegram.CurrentBotUsername
 			}
 			btn := telegram.NewButtonMaker()
-			btn.UButtonStyled("◈ "+telegram.ToSmallCaps("Start Bot in PM"), fmt.Sprintf("https://t.me/%s?start=start", botUser), "primary")
-			sentID, err := b.sender.SendMessage(ctx, peer, "<i>You didn't START the bot in PM (Private)</i>", m.ID, btn.BuildMenu(1))
+			btn.UButtonStyled("◈ "+telegram.ToSmallCaps("Mulai Bot di PM"), fmt.Sprintf("https://t.me/%s?start=start", botUser), "primary")
+			sentID, err := b.sender.SendMessage(ctx, peer, "<i>Anda belum MEMULAI bot di PM (Pribadi)</i>", m.ID, btn.BuildMenu(1))
 			if err == nil && sentID > 0 {
 				b.sender.AutoDeleteMessage(peer, sentID, 20)
 			}
@@ -1005,11 +1005,11 @@ func (b *BotApp) sendStartupNotification(ctx context.Context) {
 			chatID, _ := strconv.ParseInt(parts[0], 10, 64)
 			msgID, _ := strconv.Atoi(parts[1])
 			if chatID != 0 && msgID != 0 {
-				restartSuccessText := fmt.Sprintf("⌬ <b><i>Restarted Successfully!</i></b>\n"+
-					"┠ <b>Date:</b> %s\n"+
-					"┠ <b>Time:</b> %s\n"+
-					"┠ <b>TimeZone:</b> %s\n"+
-					"┖ <b>Version:</b> <code>1.0.0</code>", dateStr, timeStr, timz)
+				restartSuccessText := fmt.Sprintf("⌬ <b><i>Berhasil Dimulai Ulang!</i></b>\n"+
+					"┠ <b>Tanggal:</b> %s\n"+
+					"┠ <b>Waktu:</b> %s\n"+
+					"┠ <b>Zona Waktu:</b> %s\n"+
+					"┖ <b>Versi:</b> <code>1.0.0</code>", dateStr, timeStr, timz)
 
 				peer := b.getPeerForChatID(chatID)
 				if b.sender != nil && peer != nil {
@@ -1021,11 +1021,11 @@ func (b *BotApp) sendStartupNotification(ctx context.Context) {
 	}
 
 	// 2. Otherwise send Bot Started Successfully notification to Authorized Chats (GC) or Owner via MTProto
-	startMsg := fmt.Sprintf("⌬ <b><i>Bot Started Successfully!</i></b>\n"+
-		"┠ <b>Date:</b> %s\n"+
-		"┠ <b>Time:</b> %s\n"+
-		"┠ <b>TimeZone:</b> %s\n"+
-		"┖ <b>Version:</b> <code>1.0.0</code>", dateStr, timeStr, timz)
+	startMsg := fmt.Sprintf("⌬ <b><i>Bot Berhasil Dimulai!</i></b>\n"+
+		"┠ <b>Tanggal:</b> %s\n"+
+		"┠ <b>Waktu:</b> %s\n"+
+		"┠ <b>Zona Waktu:</b> %s\n"+
+		"┖ <b>Versi:</b> <code>1.0.0</code>", dateStr, timeStr, timz)
 
 	sendNotification := func(targetID int64) {
 		if targetID == 0 || b.sender == nil {
@@ -1070,7 +1070,7 @@ func (b *BotApp) registerBotCommands(ctx context.Context) {
 			clean = clean[:32]
 		}
 		if len(desc) < 3 {
-			desc = desc + " command"
+			desc = desc + " perintah"
 		}
 		if len(desc) > 256 {
 			desc = desc[:256]
@@ -1083,63 +1083,63 @@ func (b *BotApp) registerBotCommands(ctx context.Context) {
 
 	bc := telegram.BotCommands
 	if len(bc.Leech) > 1 {
-		addCmd(bc.Leech[0], fmt.Sprintf("or /%s Leech [links/media/rclone_path]", bc.Leech[1]))
+		addCmd(bc.Leech[0], fmt.Sprintf("atau /%s Leech [links/media/rclone_path]", bc.Leech[1]))
 	} else if len(bc.Leech) > 0 {
 		addCmd(bc.Leech[0], "Leech [links/media/rclone_path]")
 	}
 
 	if cfg.ShowExtraCmds && len(bc.Leech) >= 6 {
-		addCmd(bc.Leech[2], fmt.Sprintf("or /%s Leech and Zip [links/media]", bc.Leech[3]))
-		addCmd(bc.Leech[4], fmt.Sprintf("or /%s Leech and Unzip [links/media]", bc.Leech[5]))
+		addCmd(bc.Leech[2], fmt.Sprintf("atau /%s Leech dan Zip [links/media]", bc.Leech[3]))
+		addCmd(bc.Leech[4], fmt.Sprintf("atau /%s Leech dan Unzip [links/media]", bc.Leech[5]))
 	}
 
 	if len(bc.Ytdl) > 1 {
-		addCmd(bc.Ytdl[0], fmt.Sprintf("or /%s Leech yt-dlp supported links", bc.Ytdl[1]))
+		addCmd(bc.Ytdl[0], fmt.Sprintf("atau /%s Leech tautan yang didukung yt-dlp", bc.Ytdl[1]))
 	}
 	if len(bc.Status) > 1 {
-		addCmd(bc.Status[0], fmt.Sprintf("or /%s Get Bot All Status Stats Message", bc.Status[1]))
+		addCmd(bc.Status[0], fmt.Sprintf("atau /%s Lihat semua status tugas bot", bc.Status[1]))
 	}
 	if len(bc.Stats) > 1 {
-		addCmd(bc.Stats[0], fmt.Sprintf("or /%s Check Bot & System stats", bc.Stats[1]))
+		addCmd(bc.Stats[0], fmt.Sprintf("atau /%s Cek statistik bot & sistem", bc.Stats[1]))
 	}
 	if len(bc.Cancel) > 0 {
-		addCmd(bc.Cancel[0], "Cancel a Task of yours!")
+		addCmd(bc.Cancel[0], "Batalkan tugas Anda!")
 	}
 	if len(bc.CancelAll) > 0 {
-		addCmd(bc.CancelAll[0], "Cancel all Tasks in whole Bots.")
+		addCmd(bc.CancelAll[0], "Batalkan semua tugas di seluruh bot.")
 	}
 	if len(bc.Help) > 0 {
-		addCmd(bc.Help[0], "Get detailed help about the Bot")
+		addCmd(bc.Help[0], "Dapatkan bantuan lengkap tentang bot")
 	}
 	if len(bc.UserSetting) > 1 {
-		addCmd(bc.UserSetting[0], fmt.Sprintf("or /%s User's Personal Settings (Open in PM)", bc.UserSetting[1]))
+		addCmd(bc.UserSetting[0], fmt.Sprintf("atau /%s Pengaturan pribadi pengguna (Buka di PM)", bc.UserSetting[1]))
 	}
 	if len(bc.BotSetting) > 1 {
-		addCmd(bc.BotSetting[0], fmt.Sprintf("or /%s Bot Settings (Owner/Sudo)", bc.BotSetting[1]))
+		addCmd(bc.BotSetting[0], fmt.Sprintf("atau /%s Pengaturan Bot (Pemilik/Sudo)", bc.BotSetting[1]))
 	}
 	if len(bc.Speedtest) > 1 {
-		addCmd(bc.Speedtest[0], fmt.Sprintf("or /%s Check Server Up & Down Speed", bc.Speedtest[1]))
+		addCmd(bc.Speedtest[0], fmt.Sprintf("atau /%s Cek kecepatan unggah & unduh server", bc.Speedtest[1]))
 	}
 	if len(bc.MediaInfo) > 1 {
-		addCmd(bc.MediaInfo[0], fmt.Sprintf("or /%s Generate Mediainfo for Media or DL links", bc.MediaInfo[1]))
+		addCmd(bc.MediaInfo[0], fmt.Sprintf("atau /%s Buat Mediainfo untuk media atau tautan unduhan", bc.MediaInfo[1]))
 	}
 	if len(bc.Broadcast) > 1 {
-		addCmd(bc.Broadcast[0], fmt.Sprintf("or /%s Broadcast message to all users", bc.Broadcast[1]))
+		addCmd(bc.Broadcast[0], fmt.Sprintf("atau /%s Kirim pesan siaran ke semua pengguna", bc.Broadcast[1]))
 	}
 	if len(bc.Imdb) > 0 {
-		addCmd(bc.Imdb[0], "Search Movies/Series on IMDB.com")
+		addCmd(bc.Imdb[0], "Cari film/serial di IMDB.com")
 	}
 	if len(bc.Anime) > 1 {
-		addCmd(bc.Anime[0], fmt.Sprintf("or /%s Search Animes on AniList.com", bc.Anime[1]))
+		addCmd(bc.Anime[0], fmt.Sprintf("atau /%s Cari anime di AniList.com", bc.Anime[1]))
 	}
 	if len(bc.Ping) > 1 {
-		addCmd(bc.Ping[0], fmt.Sprintf("or /%s Check Bot Ping & Latency", bc.Ping[1]))
+		addCmd(bc.Ping[0], fmt.Sprintf("atau /%s Cek ping & latensi bot", bc.Ping[1]))
 	}
 	if len(bc.Restart) > 1 {
-		addCmd(bc.Restart[0], fmt.Sprintf("or /%s Restart the Bot (Owner/Sudo)", bc.Restart[1]))
+		addCmd(bc.Restart[0], fmt.Sprintf("atau /%s Mulai ulang bot (Pemilik/Sudo)", bc.Restart[1]))
 	}
 	if len(bc.Log) > 0 {
-		addCmd(bc.Log[0], "Get Bot Log (Owner/Sudo)")
+		addCmd(bc.Log[0], "Lihat log bot (Pemilik/Sudo)")
 	}
 
 	req := &tg.BotsSetBotCommandsRequest{
@@ -1280,7 +1280,7 @@ func (b *BotApp) handleIncomingMedia(ctx context.Context, peer tg.InputPeerClass
 			switch lowerName {
 			case "token.pickle":
 				if !telegram.IsOwner(senderID) && !telegram.IsSudo(senderID, b.userMap) {
-					_, _ = b.sender.SendMessage(ctx, peer, "Only Owner/Sudo can upload <code>token.pickle</code>!", m.ID, nil)
+					_, _ = b.sender.SendMessage(ctx, peer, "Hanya Pemilik/Sudo yang dapat mengunggah <code>token.pickle</code>!", m.ID, nil)
 					return true
 				}
 				dl := tdDownloader.NewDownloader()
@@ -1290,7 +1290,7 @@ func (b *BotApp) handleIncomingMedia(ctx context.Context, peer tg.InputPeerClass
 				}
 				_, err := dl.Download(b.rawAPI, loc).ToPath(ctx, "token.pickle")
 				if err != nil {
-					_, _ = b.sender.SendMessage(ctx, peer, fmt.Sprintf("× Error downloading <b>token.pickle</b>: %v", err), m.ID, nil)
+					_, _ = b.sender.SendMessage(ctx, peer, fmt.Sprintf("× Kesalahan mengunduh <b>token.pickle</b>: %v", err), m.ID, nil)
 					return true
 				}
 				// Reload Google Drive OAuth credentials immediately
@@ -1298,12 +1298,12 @@ func (b *BotApp) handleIncomingMedia(ctx context.Context, peer tg.InputPeerClass
 				if gClient != nil {
 					_ = gClient.LoadCredentials("token.pickle")
 				}
-				_, _ = b.sender.SendMessage(ctx, peer, "✓ <b>token.pickle</b> received and saved! Google Drive OAuth credentials successfully reloaded.", m.ID, nil)
+				_, _ = b.sender.SendMessage(ctx, peer, "✓ <b>token.pickle</b> diterima dan disimpan! Kredensial OAuth Google Drive berhasil dimuat ulang.", m.ID, nil)
 				return true
 
 			case "config.env":
 				if !telegram.IsOwner(senderID) && !telegram.IsSudo(senderID, b.userMap) {
-					_, _ = b.sender.SendMessage(ctx, peer, "Only Owner/Sudo can upload <code>config.env</code>!", m.ID, nil)
+					_, _ = b.sender.SendMessage(ctx, peer, "Hanya Pemilik/Sudo yang dapat mengunggah <code>config.env</code>!", m.ID, nil)
 					return true
 				}
 				dl := tdDownloader.NewDownloader()
@@ -1313,16 +1313,16 @@ func (b *BotApp) handleIncomingMedia(ctx context.Context, peer tg.InputPeerClass
 				}
 				_, err := dl.Download(b.rawAPI, loc).ToPath(ctx, "config.env")
 				if err != nil {
-					_, _ = b.sender.SendMessage(ctx, peer, fmt.Sprintf("× Error downloading <b>config.env</b>: %v", err), m.ID, nil)
+					_, _ = b.sender.SendMessage(ctx, peer, fmt.Sprintf("× Kesalahan mengunduh <b>config.env</b>: %v", err), m.ID, nil)
 					return true
 				}
 				_, _ = config.LoadConfig("config.env")
-				_, _ = b.sender.SendMessage(ctx, peer, "✓ <b>config.env</b> received and saved! Configurations reloaded.", m.ID, nil)
+				_, _ = b.sender.SendMessage(ctx, peer, "✓ <b>config.env</b> diterima dan disimpan! Konfigurasi dimuat ulang.", m.ID, nil)
 				return true
 
 			case "cookies.txt":
 				if !telegram.IsOwner(senderID) && !telegram.IsSudo(senderID, b.userMap) {
-					_, _ = b.sender.SendMessage(ctx, peer, "Only Owner/Sudo can upload <code>cookies.txt</code>!", m.ID, nil)
+					_, _ = b.sender.SendMessage(ctx, peer, "Hanya Pemilik/Sudo yang dapat mengunggah <code>cookies.txt</code>!", m.ID, nil)
 					return true
 				}
 				dl := tdDownloader.NewDownloader()
@@ -1332,15 +1332,15 @@ func (b *BotApp) handleIncomingMedia(ctx context.Context, peer tg.InputPeerClass
 				}
 				_, err := dl.Download(b.rawAPI, loc).ToPath(ctx, "cookies.txt")
 				if err != nil {
-					_, _ = b.sender.SendMessage(ctx, peer, fmt.Sprintf("× Error downloading <b>cookies.txt</b>: %v", err), m.ID, nil)
+					_, _ = b.sender.SendMessage(ctx, peer, fmt.Sprintf("× Kesalahan mengunduh <b>cookies.txt</b>: %v", err), m.ID, nil)
 					return true
 				}
-				_, _ = b.sender.SendMessage(ctx, peer, "✓ <b>cookies.txt</b> received and saved for yt-dlp & aria2c!", m.ID, nil)
+				_, _ = b.sender.SendMessage(ctx, peer, "✓ <b>cookies.txt</b> diterima dan disimpan untuk yt-dlp & aria2c!", m.ID, nil)
 				return true
 
 			case "accounts.zip":
 				if !telegram.IsOwner(senderID) && !telegram.IsSudo(senderID, b.userMap) {
-					_, _ = b.sender.SendMessage(ctx, peer, "Only Owner/Sudo can upload <code>accounts.zip</code>!", m.ID, nil)
+					_, _ = b.sender.SendMessage(ctx, peer, "Hanya Pemilik/Sudo yang dapat mengunggah <code>accounts.zip</code>!", m.ID, nil)
 					return true
 				}
 				dl := tdDownloader.NewDownloader()
@@ -1350,15 +1350,15 @@ func (b *BotApp) handleIncomingMedia(ctx context.Context, peer tg.InputPeerClass
 				}
 				_, err := dl.Download(b.rawAPI, loc).ToPath(ctx, "accounts.zip")
 				if err != nil {
-					_, _ = b.sender.SendMessage(ctx, peer, fmt.Sprintf("× Error downloading <b>accounts.zip</b>: %v", err), m.ID, nil)
+					_, _ = b.sender.SendMessage(ctx, peer, fmt.Sprintf("× Kesalahan mengunduh <b>accounts.zip</b>: %v", err), m.ID, nil)
 					return true
 				}
-				_, _ = b.sender.SendMessage(ctx, peer, "✓ <b>accounts.zip</b> received and saved successfully!", m.ID, nil)
+				_, _ = b.sender.SendMessage(ctx, peer, "✓ <b>accounts.zip</b> diterima dan berhasil disimpan!", m.ID, nil)
 				return true
 
 			case "shorteners.txt":
 				if !telegram.IsOwner(senderID) && !telegram.IsSudo(senderID, b.userMap) {
-					_, _ = b.sender.SendMessage(ctx, peer, "Only Owner/Sudo can upload <code>shorteners.txt</code>!", m.ID, nil)
+					_, _ = b.sender.SendMessage(ctx, peer, "Hanya Pemilik/Sudo yang dapat mengunggah <code>shorteners.txt</code>!", m.ID, nil)
 					return true
 				}
 				dl := tdDownloader.NewDownloader()
@@ -1368,11 +1368,11 @@ func (b *BotApp) handleIncomingMedia(ctx context.Context, peer tg.InputPeerClass
 				}
 				_, err := dl.Download(b.rawAPI, loc).ToPath(ctx, "shorteners.txt")
 				if err != nil {
-					_, _ = b.sender.SendMessage(ctx, peer, fmt.Sprintf("× Error downloading <b>shorteners.txt</b>: %v", err), m.ID, nil)
+					_, _ = b.sender.SendMessage(ctx, peer, fmt.Sprintf("× Kesalahan mengunduh <b>shorteners.txt</b>: %v", err), m.ID, nil)
 					return true
 				}
 				ext.LoadShorteners()
-				_, _ = b.sender.SendMessage(ctx, peer, fmt.Sprintf("✓ <b>shorteners.txt</b> received and saved! %d shortener(s) loaded.", len(ext.GetShorteners())), m.ID, nil)
+				_, _ = b.sender.SendMessage(ctx, peer, fmt.Sprintf("✓ <b>shorteners.txt</b> diterima dan disimpan! %d layanan pemendek tautan dimuat.", len(ext.GetShorteners())), m.ID, nil)
 				return true
 			}
 
@@ -1396,7 +1396,7 @@ func (b *BotApp) handleIncomingMedia(ctx context.Context, peer tg.InputPeerClass
 							_ = ext.DB.SaveUser(u)
 
 							// Always send immediate confirmation to user in current chat
-							_, _ = b.sender.SendMessage(ctx, peer, "✓ <b>Custom thumbnail saved!</b> It will be attached to all your future leeched files.", m.ID, nil)
+							_, _ = b.sender.SendMessage(ctx, peer, "✓ <b>Thumbnail kustom berhasil disimpan!</b> Thumbnail ini akan dilampirkan pada semua berkas hasil leech Anda selanjutnya.", m.ID, nil)
 
 							// Refresh interactive /us settings menu if prompt was active
 							if sess != nil && sess.PromptMsgID > 0 && b.settingsUpdateHandler != nil {
@@ -1429,7 +1429,7 @@ func (b *BotApp) handleIncomingMedia(ctx context.Context, peer tg.InputPeerClass
 							ChatID:     chatID,
 							MessageID:  m.ID,
 							UserID:     senderID,
-							SenderName: "User",
+							SenderName: "Pengguna",
 							Text:       fmt.Sprintf("/leech %s", torrentPath),
 						}
 						b.leechHandler(ctx, peer, msgCtx, false, false)
@@ -1469,7 +1469,7 @@ func (b *BotApp) handleIncomingMedia(ctx context.Context, peer tg.InputPeerClass
 						_ = ext.DB.SaveUser(u)
 
 						// Always send immediate confirmation to user in current chat
-						_, _ = b.sender.SendMessage(ctx, peer, "✓ <b>Custom thumbnail saved!</b> It will be attached to all your future leeched files.", m.ID, nil)
+						_, _ = b.sender.SendMessage(ctx, peer, "✓ <b>Thumbnail kustom berhasil disimpan!</b> Thumbnail ini akan dilampirkan pada semua berkas hasil leech Anda selanjutnya.", m.ID, nil)
 
 						// Refresh interactive /us settings menu if prompt was active
 						if sess != nil && sess.PromptMsgID > 0 && b.settingsUpdateHandler != nil {
@@ -1502,65 +1502,65 @@ func (b *BotApp) applyUserSettingValue(ctx context.Context, peer tg.InputPeerCla
 	case "lprefix":
 		if strings.EqualFold(val, "clear") || strings.EqualFold(val, "none") {
 			u.Prefix = ""
-			val = "Cleared"
+			val = "Dihapus"
 		} else {
 			u.Prefix = val
 		}
-		fieldName = "Leech Prefix"
+		fieldName = "Awalan Leech"
 	case "lsuffix":
 		if strings.EqualFold(val, "clear") || strings.EqualFold(val, "none") {
 			u.Suffix = ""
-			val = "Cleared"
+			val = "Dihapus"
 		} else {
 			u.Suffix = val
 		}
-		fieldName = "Leech Suffix"
+		fieldName = "Akhiran Leech"
 	case "lcaption":
 		if strings.EqualFold(val, "clear") || strings.EqualFold(val, "none") || strings.EqualFold(val, "default") {
 			u.Caption = ""
-			val = "Default"
+			val = "Bawaan"
 		} else {
 			u.Caption = val
 		}
-		fieldName = "Leech Caption"
+		fieldName = "Keterangan Leech"
 	case "lremname_auto":
 		if strings.EqualFold(val, "clear") || strings.EqualFold(val, "none") {
 			u.RemnameAuto = ""
-			val = "Cleared"
+			val = "Dihapus"
 		} else {
 			u.RemnameAuto = val
 		}
-		fieldName = "AutoRename Template"
+		fieldName = "Templat AutoRename"
 	case "lremname_regex":
 		if strings.EqualFold(val, "clear") || strings.EqualFold(val, "none") {
 			u.RemnameRegex = ""
-			val = "Cleared"
+			val = "Dihapus"
 		} else {
 			u.RemnameRegex = val
 		}
-		fieldName = "Regex Remname"
+		fieldName = "Ganti Nama Regex"
 	case "ldump":
 		if strings.EqualFold(val, "clear") || strings.EqualFold(val, "none") {
 			u.DumpChatID = 0
-			val = "Cleared"
+			val = "Dihapus"
 		} else {
 			id, _ := strconv.ParseInt(val, 10, 64)
 			u.DumpChatID = id
 		}
-		fieldName = "Leech Dump Channel"
+		fieldName = "Kanal Dump Leech"
 	case "lmeta":
 		if strings.EqualFold(val, "clear") || strings.EqualFold(val, "none") {
 			if u.Metadata != nil {
 				delete(u.Metadata, "all")
 			}
-			val = "Cleared"
+			val = "Dihapus"
 		} else {
 			if u.Metadata == nil {
 				u.Metadata = make(map[string]string)
 			}
 			u.Metadata["all"] = val
 		}
-		fieldName = "Leech Metadata"
+		fieldName = "Metadata Leech"
 	case "split_size":
 		sizeStr := strings.ToUpper(val)
 		maxSplit := config.GetMaxSplitSize()
@@ -1578,7 +1578,7 @@ func (b *BotApp) applyUserSettingValue(ctx context.Context, peer tg.InputPeerCla
 			bytes = maxSplit
 		}
 		u.SplitSize = bytes
-		fieldName = "Leech Split Size"
+		fieldName = "Ukuran Pemisahan Leech"
 		val = ext.GetReadableFileSize(u.SplitSize)
 	}
 
@@ -1586,7 +1586,7 @@ func (b *BotApp) applyUserSettingValue(ctx context.Context, peer tg.InputPeerCla
 	if promptMsgID > 0 && b.settingsUpdateHandler != nil {
 		b.settingsUpdateHandler(ctx, peer, promptMsgID, u, key)
 	} else {
-		confirmText := fmt.Sprintf("✓ <b>%s</b> updated to: <code>%s</code>", fieldName, val)
+		confirmText := fmt.Sprintf("✓ <b>%s</b> diatur ke: <code>%s</code>", fieldName, val)
 		_, _ = b.sender.SendMessage(ctx, peer, confirmText, 0, nil)
 	}
 }

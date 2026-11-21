@@ -58,9 +58,9 @@ func (m *YtdlModule) HandleYtdl(ctx context.Context, peer tg.InputPeerClass, msg
 			"┎ <b>%s:</b>\n"+
 			"┠ <code>/ytdl https://youtu.be/...</code>\n"+
 			"┖ <code>/ytdl https://youtu.be/... 720p</code>",
-			telegram.ToSmallCaps("YtDlp Media Downloader"),
-			telegram.ToSmallCaps("Usage"),
-			telegram.ToSmallCaps("Examples"))
+			telegram.ToSmallCaps("Pengunduh Media YtDlp"),
+			telegram.ToSmallCaps("Penggunaan"),
+			telegram.ToSmallCaps("Contoh"))
 		_, _ = m.sender.SendMessage(ctx, peer, helpMsg, msg.MessageID, nil)
 		return
 	}
@@ -74,7 +74,7 @@ func (m *YtdlModule) HandleYtdl(ctx context.Context, peer tg.InputPeerClass, msg
 		customQuality = tokens[2]
 	}
 	if link != "" && !ext.IsURL(link) {
-		m.sendDownloadError(ctx, peer, msg, 0, "Invalid link or resource not found! Please check the URL.", "#Leech | #YtDlp", time.Now())
+		m.sendDownloadError(ctx, peer, msg, 0, "Tautan tidak valid atau sumber daya tidak ditemukan! Silakan periksa URL.", "#Leech | #YtDlp", time.Now())
 		return
 	}
 
@@ -90,7 +90,7 @@ func (m *YtdlModule) HandleYtdl(ctx context.Context, peer tg.InputPeerClass, msg
 		isFirstStatus = m.statusMod.ReserveStatusSlot(msg.ChatID)
 	}
 
-	notifyID, _ := m.sender.SendMessage(ctx, peer, fmt.Sprintf("<i>%s...</i>", telegram.ToSmallCaps("Fetching Media Info with yt-dlp")), msg.MessageID, nil)
+	notifyID, _ := m.sender.SendMessage(ctx, peer, fmt.Sprintf("<i>%s...</i>", telegram.ToSmallCaps("Mengambil Info Media dengan yt-dlp")), msg.MessageID, nil)
 	if notifyID > 0 && m.statusMod != nil {
 		if isFirstStatus {
 			m.statusMod.SetStatusMessage(msg.ChatID, notifyID, peer)
@@ -109,12 +109,12 @@ func (m *YtdlModule) sendDownloadError(ctx context.Context, peer tg.InputPeerCla
 	}
 
 	elapsed := ext.TimeSinceFormatted(startTime)
-	errMsg := fmt.Sprintf("<i><b>Download Stopped!</b></i>\n"+
-		"┠ <b>Task for:</b> %s\n"+
+	errMsg := fmt.Sprintf("<i><b>Unduhan Dihentikan!</b></i>\n"+
+		"┠ <b>Tugas untuk:</b> %s\n"+
 		"┃\n"+
-		"┠ <b>Due To:</b> %s\n"+
+		"┠ <b>Karena:</b> %s\n"+
 		"┠ <b>Mode:</b> %s\n"+
-		"┖ <b>Elapsed:</b> %s",
+		"┖ <b>Durasi:</b> %s",
 		tag, telegram.EscapeHTML(errStr), mode, elapsed)
 
 	if notifyID > 0 {
@@ -153,7 +153,7 @@ func (m *YtdlModule) processYtdl(peer tg.InputPeerClass, msg *types.MessageConte
 	var maxDLSpeed, maxULSpeed float64
 
 	taskUID := fmt.Sprintf("yt_%d_%s", msg.UserID, ext.RandomHex(3))
-	uTask := ext.NewUnifiedTask(taskUID, "yt-dlp Media", 0, msg.ChatID, msg.UserID, notifyID, cancel)
+	uTask := ext.NewUnifiedTask(taskUID, "Media yt-dlp", 0, msg.ChatID, msg.UserID, notifyID, cancel)
 	uTask.SetEngine("yt-dlp")
 	m.taskMgr.AddTask(uTask)
 
@@ -211,13 +211,13 @@ func (m *YtdlModule) processYtdl(peer tg.InputPeerClass, msg *types.MessageConte
 
 	fi, sErr := os.Stat(downloadedFile)
 	if sErr != nil || fi.Size() == 0 {
-		m.sendDownloadError(ctx, peer, msg, notifyID, "Downloaded file is missing or empty (0 bytes)", "#Leech | #YtDlp", taskStartTime)
+		m.sendDownloadError(ctx, peer, msg, notifyID, "Berkas unduhan tidak ada atau kosong (0 byte)", "#Leech | #YtDlp", taskStartTime)
 		return
 	}
 	totalSize := fi.Size()
 	uTask.SetName(finalName)
 	uTask.SetSize(totalSize)
-	uTask.SetStatus(types.StatusUploading, "Gotd Uploader")
+	uTask.SetStatus(types.StatusUploading, "Pengunggah Gotd")
 
 	customThumb := ""
 	if user != nil && user.CustomThumb != "" {
@@ -281,7 +281,7 @@ func (m *YtdlModule) processYtdl(peer tg.InputPeerClass, msg *types.MessageConte
 	_, upErr := m.uploader.UploadFile(ctx, peer, upOpt)
 	if upErr != nil {
 		log.Printf("[AZML-Go Ytdl] Upload error for %s: %v", finalName, upErr)
-		m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Upload Failed: %v", upErr), "#Leech | #YtDlp", taskStartTime)
+		m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Gagal mengunggah: %v", upErr), "#Leech | #YtDlp", taskStartTime)
 		return
 	}
 
@@ -308,25 +308,25 @@ func (m *YtdlModule) processYtdl(peer tg.InputPeerClass, msg *types.MessageConte
 	// Group completion card matching Image 1
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("<b>%s</b>\n|\n", finalName))
-	sb.WriteString(fmt.Sprintf("├── <b>Size:</b> %s\n", ext.GetReadableFileSize(totalSize)))
-	sb.WriteString(fmt.Sprintf("├── <b>Elapsed:</b> %s\n", ext.GetReadableTime(int64(overallElapsed.Seconds()))))
-	sb.WriteString(fmt.Sprintf("├── <b>Avg DL Speed:</b> %s/s\n", ext.GetReadableFileSize(int64(avgDLSpeed))))
-	sb.WriteString(fmt.Sprintf("├── <b>Avg UL Speed:</b> %s/s\n", ext.GetReadableFileSize(int64(avgULSpeed))))
+	sb.WriteString(fmt.Sprintf("├── <b>Ukuran:</b> %s\n", ext.GetReadableFileSize(totalSize)))
+	sb.WriteString(fmt.Sprintf("├── <b>Durasi:</b> %s\n", ext.GetReadableTime(int64(overallElapsed.Seconds()))))
+	sb.WriteString(fmt.Sprintf("├── <b>Kecepatan Unduh Rata-rata:</b> %s/s\n", ext.GetReadableFileSize(int64(avgDLSpeed))))
+	sb.WriteString(fmt.Sprintf("├── <b>Kecepatan Unggah Rata-rata:</b> %s/s\n", ext.GetReadableFileSize(int64(avgULSpeed))))
 	sb.WriteString("├── <b>Mode:</b> #Leech | #YtDlp\n")
-	sb.WriteString(fmt.Sprintf("├── <b>Max DL Speed:</b> %s/s\n", ext.GetReadableFileSize(int64(maxDLSpeed))))
-	sb.WriteString(fmt.Sprintf("├── <b>Max UL Speed:</b> %s/s\n", ext.GetReadableFileSize(int64(maxULSpeed))))
-	sb.WriteString("├── <b>Total Files:</b> 1\n")
+	sb.WriteString(fmt.Sprintf("├── <b>Kecepatan Unduh Maks:</b> %s/s\n", ext.GetReadableFileSize(int64(maxDLSpeed))))
+	sb.WriteString(fmt.Sprintf("├── <b>Kecepatan Unggah Maks:</b> %s/s\n", ext.GetReadableFileSize(int64(maxULSpeed))))
+	sb.WriteString("├── <b>Total Berkas:</b> 1\n")
 
 	userTag := fmt.Sprintf("@%s", msg.Username)
 	if msg.Username == "" {
 		userTag = fmt.Sprintf("<a href=\"tg://user?id=%d\">%s</a>", msg.UserID, msg.SenderName)
 	}
-	sb.WriteString(fmt.Sprintf("└── <b>By:</b> %s\n\n", userTag))
+	sb.WriteString(fmt.Sprintf("└── <b>Oleh:</b> %s\n\n", userTag))
 
 	if botPM {
-		sb.WriteString("➲ <i>File(s) have been Sent to Bot PM (Private)</i>\n")
+		sb.WriteString("➲ <i>Berkas telah dikirim ke PM Bot (Pribadi)</i>\n")
 	} else {
-		sb.WriteString("➲ <i>File(s) have been Sent. Access via Links...</i>\n")
+		sb.WriteString("➲ <i>Berkas telah dikirim. Akses melalui tautan...</i>\n")
 	}
 	sb.WriteString(fmt.Sprintf("1. <code>%s</code>\n", finalName))
 
@@ -335,7 +335,7 @@ func (m *YtdlModule) processYtdl(peer tg.InputPeerClass, msg *types.MessageConte
 		botUser = "Yukiileechrrbot"
 	}
 	finishBtn := telegram.NewButtonMaker()
-	finishBtn.UButtonStyled("◈ "+telegram.ToSmallCaps("View in Bot PM"), fmt.Sprintf("https://t.me/%s", botUser), "primary")
+	finishBtn.UButtonStyled("◈ "+telegram.ToSmallCaps("Lihat di PM Bot"), fmt.Sprintf("https://t.me/%s", botUser), "primary")
 
 	_, _ = m.sender.SendMessageWithButtons(ctx, peer, sb.String(), msg.MessageID, finishBtn, 1)
 

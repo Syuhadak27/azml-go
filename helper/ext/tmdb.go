@@ -186,7 +186,7 @@ func GetTMDBPosterLink(ctx context.Context, title, year string, asDoc bool) (str
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("tmdb search returned status %d", resp.StatusCode)
+		return "", fmt.Errorf("pencarian TMDB mengembalikan status %d", resp.StatusCode)
 	}
 
 	var searchRes tmdbSearchResult
@@ -336,7 +336,7 @@ func DownloadImage(ctx context.Context, imageURL, destPath string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("download image failed with status %d", resp.StatusCode)
+		return fmt.Errorf("gagal mengunduh gambar dengan status %d", resp.StatusCode)
 	}
 
 	_ = os.MkdirAll(filepath.Dir(destPath), 0755)

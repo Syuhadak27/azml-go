@@ -262,13 +262,13 @@ func ForceExtractArchive(archivePath, targetDir, password string) (string, error
 	// 1. Zip Bomb & Safety Pre-check
 	uncompressedSize, count, isBomb, _ := InspectArchiveSafety(archivePath, password)
 	if isBomb {
-		return "", fmt.Errorf("⌬ Zip Bomb Protection: archive has abnormal expansion ratio or excessive files (%d files, %s unpacked). Extraction blocked",
+		return "", fmt.Errorf("⌬ Perlindungan Zip Bomb: arsip memiliki rasio ekspansi abnormal atau terlalu banyak berkas (%d berkas, %s diekstrak). Ekstraksi diblokir",
 			count, GetReadableFileSize(uncompressedSize))
 	}
 
 	// 2. Storage Threshold Pre-check
 	if uncompressedSize > 0 && !CheckStorageThreshold(uncompressedSize, true) {
-		return "", fmt.Errorf("⌬ Insufficient storage: extracting requires %s which exceeds safe storage limits",
+		return "", fmt.Errorf("⌬ Penyimpanan tidak cukup: ekstraksi memerlukan %s yang melebihi batas penyimpanan aman",
 			GetReadableFileSize(uncompressedSize))
 	}
 
@@ -312,7 +312,7 @@ func ForceExtractArchive(archivePath, targetDir, password string) (string, error
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("[ARCHIVE] 7z error: %v, output: %s", err, string(output))
-		return "", fmt.Errorf("extraction failed: %v (%s)", err, strings.TrimSpace(string(output)))
+		return "", fmt.Errorf("ekstraksi gagal: %v (%s)", err, strings.TrimSpace(string(output)))
 	}
 
 	cleanHatchZipMeta(archivePath)
@@ -334,7 +334,7 @@ func CompressToZip(sourcePath, targetZipPath, password string) error {
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Printf("[ARCHIVE] 7z zip error: %v, output: %s", err, string(output))
-		return fmt.Errorf("compression failed: %v (%s)", err, strings.TrimSpace(string(output)))
+		return fmt.Errorf("kompresi gagal: %v (%s)", err, strings.TrimSpace(string(output)))
 	}
 	return nil
 }

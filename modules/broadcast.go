@@ -27,7 +27,7 @@ func NewBroadcastModule(sender *telegram.MessageSender, userMap *types.SafeUserM
 
 func (m *BroadcastModule) HandleBroadcast(ctx context.Context, peer tg.InputPeerClass, msg *types.MessageContext) {
 	if !telegram.IsOwner(msg.UserID) && !telegram.IsSudo(msg.UserID, m.userMap) {
-		_, _ = m.sender.SendMessage(ctx, peer, "Only Owner and Sudo can broadcast messages!", msg.MessageID, nil)
+		_, _ = m.sender.SendMessage(ctx, peer, "Hanya Pemilik dan Sudo yang dapat menyiarkan pesan!", msg.MessageID, nil)
 		return
 	}
 
@@ -41,11 +41,11 @@ func (m *BroadcastModule) HandleBroadcast(ctx context.Context, peer tg.InputPeer
 		if len(parts) > 1 {
 			replyMsg = strings.Join(parts[1:], " ")
 		} else {
-			helpMsg := "<b>Broadcast Usage:</b>\n" +
-				"• Reply to any message: <code>/broadcast [-q]</code>\n" +
-				"• Send text: <code>/broadcast [Your message here]</code>\n\n" +
-				"<b>Flags:</b>\n" +
-				"<code>-q</code> Send quietly (no notification)"
+			helpMsg := "<b>Penggunaan Siaran:</b>\n" +
+				"• Balas pesan apa pun: <code>/broadcast [-q]</code>\n" +
+				"• Kirim teks: <code>/broadcast [Your message here]</code>\n\n" +
+				"<b>Opsi:</b>\n" +
+				"<code>-q</code> Kirim secara senyap (tanpa notifikasi)"
 			_, _ = m.sender.SendMessage(ctx, peer, helpMsg, msg.MessageID, nil)
 			return
 		}
@@ -55,7 +55,7 @@ func (m *BroadcastModule) HandleBroadcast(ctx context.Context, peer tg.InputPeer
 
 	users := m.userMap.GetAllUsers()
 	if len(users) == 0 {
-		_, _ = m.sender.SendMessage(ctx, peer, "No users found in database to broadcast to.", msg.MessageID, nil)
+		_, _ = m.sender.SendMessage(ctx, peer, "Tidak ada pengguna ditemukan di database untuk menerima siaran.", msg.MessageID, nil)
 		return
 	}
 
@@ -64,7 +64,7 @@ func (m *BroadcastModule) HandleBroadcast(ctx context.Context, peer tg.InputPeer
 	success := 0
 	failed := 0
 
-	statID, _ := m.sender.SendMessage(ctx, peer, "<i>Initiating broadcast...</i>", msg.MessageID, nil)
+	statID, _ := m.sender.SendMessage(ctx, peer, "<i>Memulai siaran...</i>", msg.MessageID, nil)
 
 	go func() {
 		for _, u := range users {
@@ -86,14 +86,14 @@ func (m *BroadcastModule) HandleBroadcast(ctx context.Context, peer tg.InputPeer
 			time.Sleep(100 * time.Millisecond)
 		}
 
-		resultText := fmt.Sprintf("⌬ <b><i>Broadcast Complete:</i></b>\n"+
-			"┠ <b>Total Users:</b> <code>%d</code>\n"+
-			"┠ <b>Success:</b> <code>%d</code>\n"+
-			"┠ <b>Failed:</b> <code>%d</code>\n"+
-			"┖ <b>Elapsed:</b> <code>%s</code>",
+		resultText := fmt.Sprintf("⌬ <b><i>Siaran Selesai:</i></b>\n"+
+			"┠ <b>Total Pengguna:</b> <code>%d</code>\n"+
+			"┠ <b>Berhasil:</b> <code>%d</code>\n"+
+			"┠ <b>Gagal:</b> <code>%d</code>\n"+
+			"┖ <b>Durasi:</b> <code>%s</code>",
 			total, success, failed, ext.GetReadableTime(int64(time.Since(start).Seconds())))
 		if quiet {
-			resultText += "\n<i>Sent quietly (-q)</i>"
+			resultText += "\n<i>Dikirim secara senyap (-q)</i>"
 		}
 
 		_ = m.sender.EditMessage(ctx, peer, statID, resultText, nil)

@@ -255,12 +255,12 @@ func (m *StatusModule) HandleCallback(ctx context.Context, peer tg.InputPeerClas
 			task := m.taskMgr.GetTask(gid)
 			if task != nil {
 				if fromUID != 0 && task.UserID() != 0 && task.UserID() != fromUID && !telegram.IsOwner(fromUID) {
-					_ = m.sender.AnswerCallback(ctx, queryID, "⚠️ It's not your task to cancel!", true)
+					_ = m.sender.AnswerCallback(ctx, queryID, "⚠️ Ini bukan tugas Anda, tidak bisa dibatalkan!", true)
 					return
 				}
 				_ = task.Cancel()
 				m.taskMgr.RemoveTask(gid)
-				_ = m.sender.AnswerCallback(ctx, queryID, "× Task Cancelled!", false)
+				_ = m.sender.AnswerCallback(ctx, queryID, "× Tugas Dibatalkan!", false)
 				if m.taskMgr.Count() == 0 {
 					m.DeleteAllMessages(context.Background())
 				} else {
@@ -268,13 +268,13 @@ func (m *StatusModule) HandleCallback(ctx context.Context, peer tg.InputPeerClas
 				}
 				return
 			}
-			_ = m.sender.AnswerCallback(ctx, queryID, "Task already finished or not found!", true)
+			_ = m.sender.AnswerCallback(ctx, queryID, "Tugas sudah selesai atau tidak ditemukan!", true)
 			return
 		}
 
 	case "close":
 		_ = m.sender.DeleteMessage(ctx, peer, []int{msgID})
-		_ = m.sender.AnswerCallback(ctx, queryID, "Status closed", false)
+		_ = m.sender.AnswerCallback(ctx, queryID, "Status ditutup", false)
 		m.mu.Lock()
 		if chatID != 0 {
 			delete(m.statusReplies, chatID)
@@ -311,7 +311,7 @@ func (m *StatusModule) HandleCallback(ctx context.Context, peer tg.InputPeerClas
 
 		text, btn := m.taskMgr.BuildStatusMessage(page)
 		_ = m.sender.EditMessageWithButtons(ctx, peer, msgID, text, btn, 3)
-		_ = m.sender.AnswerCallback(ctx, queryID, "Status Refreshed!", false)
+		_ = m.sender.AnswerCallback(ctx, queryID, "Status Diperbarui!", false)
 
 	case "page", "nex", "pre":
 		page := 1

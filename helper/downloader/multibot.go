@@ -106,7 +106,7 @@ func (m *MultiBotDownloader) DownloadToFile(
 
 	primaryBot, err := m.pool.GetNextAvailable(m.workerTokens, m.apiID, m.apiHash)
 	if err != nil {
-		return fmt.Errorf("no worker bot session available in pool: %w", err)
+		return fmt.Errorf("tidak ada sesi bot pekerja yang tersedia di pool: %w", err)
 	}
 
 	primaryBot.StartDownload()
@@ -116,14 +116,14 @@ func (m *MultiBotDownloader) DownloadToFile(
 	if resolveErr != nil {
 		docSize, _, _, resolveErr = primaryBot.ResolveDocument(ctx, dumpChatID, dumpMsgID, true)
 		if resolveErr != nil {
-			return fmt.Errorf("failed to resolve document from dump channel %d (msg %d): %w", dumpChatID, dumpMsgID, resolveErr)
+			return fmt.Errorf("gagal menyelesaikan dokumen dari kanal dump %d (msg %d): %w", dumpChatID, dumpMsgID, resolveErr)
 		}
 	}
 	if fileSize <= 0 {
 		fileSize = docSize
 	}
 	if fileSize <= 0 {
-		return fmt.Errorf("invalid file size %d for multi-bot download", fileSize)
+		return fmt.Errorf("ukuran berkas tidak valid %d untuk unduhan multi-bot", fileSize)
 	}
 
 	const partSize int64 = 1048576 // 1 MB chunk size (Telegram MTProto maximum)
@@ -135,7 +135,7 @@ func (m *MultiBotDownloader) DownloadToFile(
 
 	out, err := os.OpenFile(destPath, os.O_CREATE|os.O_RDWR, 0755)
 	if err != nil {
-		return fmt.Errorf("failed to open destination file %s: %w", destPath, err)
+		return fmt.Errorf("gagal membuka berkas tujuan %s: %w", destPath, err)
 	}
 	defer func() { _ = out.Close() }()
 
@@ -245,7 +245,7 @@ func (m *MultiBotDownloader) DownloadToFile(
 				data, partErr := m.fetchChunkWithRetry(workerCtx, dumpChatID, dumpMsgID, offset, requestLimit, partIndex, totalParts)
 				if partErr != nil {
 					errOnce.Do(func() {
-						firstErr = fmt.Errorf("download failed at part %d/%d (offset %d): %w", partIndex+1, totalParts, offset, partErr)
+						firstErr = fmt.Errorf("unduhan gagal pada bagian %d/%d (offset %d): %w", partIndex+1, totalParts, offset, partErr)
 						workerCancel()
 					})
 					return
@@ -253,7 +253,7 @@ func (m *MultiBotDownloader) DownloadToFile(
 
 				if int64(len(data)) < actualBytes {
 					errOnce.Do(func() {
-						firstErr = fmt.Errorf("download incomplete at part %d/%d (offset %d): expected %d bytes, got %d", partIndex+1, totalParts, offset, actualBytes, len(data))
+						firstErr = fmt.Errorf("unduhan tidak lengkap pada bagian %d/%d (offset %d): diharapkan %d byte, mendapat %d", partIndex+1, totalParts, offset, actualBytes, len(data))
 						workerCancel()
 					})
 					return
@@ -264,7 +264,7 @@ func (m *MultiBotDownloader) DownloadToFile(
 
 				if _, wErr := out.WriteAt(data, offset); wErr != nil {
 					errOnce.Do(func() {
-						firstErr = fmt.Errorf("failed to write part %d to disk: %w", partIndex+1, wErr)
+						firstErr = fmt.Errorf("gagal menulis bagian %d ke disk: %w", partIndex+1, wErr)
 						workerCancel()
 					})
 					return
@@ -288,7 +288,7 @@ func (m *MultiBotDownloader) DownloadToFile(
 	_ = out.Sync()
 	if fi, sErr := out.Stat(); sErr == nil {
 		if fi.Size() != fileSize {
-			return fmt.Errorf("downloaded file size mismatch: expected %d bytes, got %d bytes", fileSize, fi.Size())
+			return fmt.Errorf("ukuran berkas unduhan tidak cocok: diharapkan %d byte, mendapat %d byte", fileSize, fi.Size())
 		}
 	}
 	reportProgress(fileSize)
@@ -369,7 +369,7 @@ func (m *MultiBotDownloader) fetchChunkWithRetry(
 		}
 	}
 
-	return nil, fmt.Errorf("part %d/%d failed after %d attempts across worker bots", partIndex+1, totalParts, maxAttempts)
+	return nil, fmt.Errorf("bagian %d/%d gagal setelah %d percobaan pada bot pekerja", partIndex+1, totalParts, maxAttempts)
 }
 
 func (m *MultiBotDownloader) fetchChunkWithBot(
@@ -397,7 +397,7 @@ func (m *MultiBotDownloader) fetchChunkWithBot(
 
 	_, _, location, err := bot.ResolveDocument(ctx, dumpChatID, dumpMsgID, false)
 	if err != nil {
-		return nil, fmt.Errorf("failed to resolve document: %w", err)
+		return nil, fmt.Errorf("gagal menyelesaikan dokumen: %w", err)
 	}
 
 	res, err := bot.API.UploadGetFile(ctx, &tg.UploadGetFileRequest{
@@ -454,10 +454,10 @@ func (m *MultiBotDownloader) fetchChunkWithBot(
 
 	if f, ok := res.(*tg.UploadFile); ok {
 		if len(f.Bytes) == 0 {
-			return nil, fmt.Errorf("received 0 bytes from server")
+			return nil, fmt.Errorf("menerima 0 byte dari server")
 		}
 		return f.Bytes, nil
 	}
 
-	return nil, fmt.Errorf("unexpected file response %T", res)
+	return nil, fmt.Errorf("respons berkas tidak terduga %T", res)
 }

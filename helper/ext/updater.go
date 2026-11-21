@@ -68,7 +68,7 @@ func UpdateAndRestart(ctx context.Context, onStatus func(status string), recordR
 	if repo != "" && hasGit {
 		gitDir := filepath.Join(workDir, ".git")
 		if _, statErr := os.Stat(gitDir); os.IsNotExist(statErr) {
-			onStatus(fmt.Sprintf("• <i>Initializing Git and cloning <code>%s</code> (%s)...</i>", repo, branch))
+			onStatus(fmt.Sprintf("• <i>Menyiapkan Git dan mengkloning <code>%s</code> (%s)...</i>", repo, branch))
 			_, _ = runCmd(ctx, workDir, "git", "init")
 			_, _ = runCmd(ctx, workDir, "git", "config", "user.email", "bot@azml.local")
 			_, _ = runCmd(ctx, workDir, "git", "config", "user.name", "AZML-Go")
@@ -79,31 +79,31 @@ func UpdateAndRestart(ctx context.Context, onStatus func(status string), recordR
 				}
 			}
 		} else {
-			onStatus(fmt.Sprintf("• <i>Checking for updates from <code>%s</code> (%s)...</i>", repo, branch))
+			onStatus(fmt.Sprintf("• <i>Memeriksa pembaruan dari <code>%s</code> (%s)...</i>", repo, branch))
 			_, _ = runCmd(ctx, workDir, "git", "remote", "set-url", "origin", repo)
 			if _, fErr := runCmd(ctx, workDir, "git", "fetch", "origin", branch); fErr != nil {
 				log.Printf("[Updater] git fetch error: %v", fErr)
-				onStatus(fmt.Sprintf("⚠️ <i>Fetch warning: %v. Proceeding with restart...</i>", fErr))
+				onStatus(fmt.Sprintf("⚠️ <i>Peringatan fetch: %v. Melanjutkan mulai ulang...</i>", fErr))
 			} else {
 				localHash, _ := runCmd(ctx, workDir, "git", "rev-parse", "HEAD")
 				remoteHash, _ := runCmd(ctx, workDir, "git", "rev-parse", "FETCH_HEAD")
 
 				if localHash != "" && remoteHash != "" && localHash != remoteHash {
-					onStatus(fmt.Sprintf("• <i>New commits detected (<code>%.7s</code> ➔ <code>%.7s</code>). Pulling latest code...</i>", localHash, remoteHash))
+					onStatus(fmt.Sprintf("• <i>Commit baru terdeteksi (<code>%.7s</code> ➔ <code>%.7s</code>). Menarik kode terbaru...</i>", localHash, remoteHash))
 					if _, rErr := runCmd(ctx, workDir, "git", "reset", "--hard", "FETCH_HEAD"); rErr == nil {
 						updated = true
 					} else {
-						onStatus(fmt.Sprintf("⚠️ <i>Git reset failed: %v</i>", rErr))
+						onStatus(fmt.Sprintf("⚠️ <i>Git reset gagal: %v</i>", rErr))
 					}
 				} else {
-					onStatus("• <i>Codebase is already up to date with latest commit.</i>")
+					onStatus("• <i>Kode sudah mutakhir dengan commit terbaru.</i>")
 				}
 			}
 		}
 	} else if repo == "" {
-		onStatus("• <i>No UPSTREAM_REPO configured. Performing direct binary restart...</i>")
+		onStatus("• <i>UPSTREAM_REPO tidak dikonfigurasi. Melakukan mulai ulang biner secara langsung...</i>")
 	} else {
-		onStatus("⚠️ <i>Git not found in PATH. Skipping code pull and restarting current binary...</i>")
+		onStatus("⚠️ <i>Git tidak ditemukan di PATH. Melewati penarikan kode dan memulai ulang biner saat ini...</i>")
 	}
 
 	exePath, err := os.Executable()
@@ -115,9 +115,9 @@ func UpdateAndRestart(ctx context.Context, onStatus func(status string), recordR
 	if updated {
 		goPath, gErr := exec.LookPath("go")
 		if gErr != nil || goPath == "" {
-			onStatus("⚠️ <i>Go compiler not found in PATH. Code pulled but cannot compile. Restarting existing binary...</i>")
+			onStatus("⚠️ <i>Kompiler Go tidak ditemukan di PATH. Kode ditarik tetapi tidak dapat dikompilasi. Memulai ulang biner yang ada...</i>")
 		} else {
-			onStatus("• <i>Compiling latest Go binary (<code>go build -ldflags=\"-w -s\"</code>)...</i>")
+			onStatus("• <i>Mengompilasi biner Go terbaru (<code>go build -ldflags=\"-w -s\"</code>)...</i>")
 			buildCmd := exec.CommandContext(ctx, "go", "build", "-ldflags=-w -s", "-o", exePath, ".")
 			buildCmd.Dir = workDir
 			var buildOut bytes.Buffer
@@ -126,10 +126,10 @@ func UpdateAndRestart(ctx context.Context, onStatus func(status string), recordR
 
 			if bErr := buildCmd.Run(); bErr != nil {
 				log.Printf("[Updater] Build failed: %v\nOutput: %s", bErr, buildOut.String())
-				onStatus(fmt.Sprintf("❌ <b>Compilation Error:</b>\n<pre>%s</pre>\n<i>Restart aborted to keep bot online.</i>", buildOut.String()))
-				return fmt.Errorf("build failed: %v", bErr)
+				onStatus(fmt.Sprintf("❌ <b>Kesalahan Kompilasi:</b>\n<pre>%s</pre>\n<i>Mulai ulang dibatalkan untuk menjaga bot tetap online.</i>", buildOut.String()))
+				return fmt.Errorf("kompilasi gagal: %v", bErr)
 			}
-			onStatus("✅ <b>Compilation successful!</b> <i>Restarting process with updated code...</i>")
+			onStatus("✅ <b>Kompilasi berhasil!</b> <i>Memulai ulang proses dengan kode terbaru...</i>")
 		}
 	}
 

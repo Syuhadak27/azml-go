@@ -49,10 +49,10 @@ func BuildMegaSelectionButtons(uid string) tg.ReplyMarkupClass {
 	}
 
 	b := telegram.NewButtonMaker()
-	b.UButtonStyled("◈ "+telegram.ToSmallCaps("Select Files"), fmt.Sprintf("%s/app/files/%s", baseURL, uid), "primary")
-	b.IButtonStyled("◈ "+telegram.ToSmallCaps("Pincode"), fmt.Sprintf("megasel pin %s %s", uid, pinCode), "primary")
-	b.IButtonStyled("× "+telegram.ToSmallCaps("Cancel"), fmt.Sprintf("megasel cancel %s", uid), "danger")
-	b.IButtonStyled("✓ "+telegram.ToSmallCaps("Done Selecting"), fmt.Sprintf("megasel done %s", uid), "success")
+	b.UButtonStyled("◈ "+telegram.ToSmallCaps("Pilih Berkas"), fmt.Sprintf("%s/app/files/%s", baseURL, uid), "primary")
+	b.IButtonStyled("◈ "+telegram.ToSmallCaps("Kode PIN"), fmt.Sprintf("megasel pin %s %s", uid, pinCode), "primary")
+	b.IButtonStyled("× "+telegram.ToSmallCaps("Batalkan"), fmt.Sprintf("megasel cancel %s", uid), "danger")
+	b.IButtonStyled("✓ "+telegram.ToSmallCaps("Selesai Memilih"), fmt.Sprintf("megasel done %s", uid), "success")
 	return b.BuildMenu(2)
 }
 
@@ -89,13 +89,13 @@ func HandleMegaSelectCallback(ctx context.Context, rawAPI *tg.Client, sender *te
 
 	cache := GetMegaSelectCache(uid)
 	if cache == nil {
-		_ = sender.AnswerCallback(ctx, queryID, "⌬ Session expired or download already started!", true)
+		_ = sender.AnswerCallback(ctx, queryID, "⌬ Sesi kedaluwarsa atau unduhan sudah dimulai!", true)
 		_ = sender.DeleteMessage(ctx, peer, []int{msgID})
 		return
 	}
 
 	if fromUID != 0 && fromUID != cache.UserID {
-		_ = sender.AnswerCallback(ctx, queryID, "× This selection is not for you!", true)
+		_ = sender.AnswerCallback(ctx, queryID, "× Pilihan ini bukan untuk Anda!", true)
 		return
 	}
 
@@ -118,7 +118,7 @@ func HandleMegaSelectCallback(ctx context.Context, rawAPI *tg.Client, sender *te
 		}
 
 		if len(selected) == 0 {
-			_ = sender.AnswerCallback(ctx, queryID, "⌬ Select at least one file first!", true)
+			_ = sender.AnswerCallback(ctx, queryID, "⌬ Pilih setidaknya satu berkas terlebih dahulu!", true)
 			return
 		}
 
@@ -127,7 +127,7 @@ func HandleMegaSelectCallback(ctx context.Context, rawAPI *tg.Client, sender *te
 			totalSize += f.Size
 		}
 
-		_ = sender.AnswerCallback(ctx, queryID, fmt.Sprintf("⌬ Starting download of %d file(s) (%s)!", len(selected), ext.GetReadableFileSize(totalSize)), false)
+		_ = sender.AnswerCallback(ctx, queryID, fmt.Sprintf("⌬ Memulai unduhan %d berkas (%s)!", len(selected), ext.GetReadableFileSize(totalSize)), false)
 		_ = sender.DeleteMessage(ctx, peer, []int{msgID})
 
 		select {
@@ -137,7 +137,7 @@ func HandleMegaSelectCallback(ctx context.Context, rawAPI *tg.Client, sender *te
 
 	case "cancel":
 		cache.IsCancelled = true
-		_ = sender.AnswerCallback(ctx, queryID, "× Download cancelled!", false)
+		_ = sender.AnswerCallback(ctx, queryID, "× Unduhan dibatalkan!", false)
 		_ = sender.DeleteMessage(ctx, peer, []int{msgID})
 		select {
 		case cache.DoneChan <- false:

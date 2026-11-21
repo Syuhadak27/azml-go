@@ -117,7 +117,7 @@ func (m *LeechModule) HandleLeech(ctx context.Context, peer tg.InputPeerClass, m
 		}
 
 		if len(rawLinks) == 0 {
-			_, _ = m.sender.SendMessage(ctx, peer, "<b>Reply to a message with links separated by new line for bulk leeching!</b>", msg.MessageID, nil)
+			_, _ = m.sender.SendMessage(ctx, peer, "<b>Balas pesan dengan tautan yang dipisahkan oleh baris baru untuk leech massal!</b>", msg.MessageID, nil)
 			return
 		}
 
@@ -145,7 +145,7 @@ func (m *LeechModule) HandleLeech(ctx context.Context, peer tg.InputPeerClass, m
 			}
 		}
 
-		_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("⌬ <b>Bulk Leech Initiated:</b> <code>%d links</code>", len(bulkLinks)), msg.MessageID, nil)
+		_, _ = m.sender.SendMessage(ctx, peer, fmt.Sprintf("⌬ <b>Leech Massal Dimulai:</b> <code>%d tautan</code>", len(bulkLinks)), msg.MessageID, nil)
 
 		go func() {
 			for _, bLink := range bulkLinks {
@@ -160,7 +160,7 @@ func (m *LeechModule) HandleLeech(ctx context.Context, peer tg.InputPeerClass, m
 					isFirstBulk = m.statusMod.ReserveStatusSlot(msg.ChatID)
 				}
 
-				nID, _ := m.sender.SendMessage(context.Background(), peer, fmt.Sprintf("<i>Initiating Leech:</i> <code>%s</code>", truncateString(bLink, 40)), msg.MessageID, nil)
+				nID, _ := m.sender.SendMessage(context.Background(), peer, fmt.Sprintf("<i>Memulai Leech:</i> <code>%s</code>", truncateString(bLink, 40)), msg.MessageID, nil)
 				if nID > 0 && m.statusMod != nil {
 					if isFirstBulk {
 						m.statusMod.SetStatusMessage(msg.ChatID, nID, peer)
@@ -243,25 +243,25 @@ func (m *LeechModule) HandleLeech(ctx context.Context, peer tg.InputPeerClass, m
 			"┠ <code>-med</code> — %s\n"+
 			"┠ <code>-ud</code> — %s\n"+
 			"┖ <code>-st</code> — %s",
-			telegram.ToSmallCaps("Leech Command Usage"),
-			telegram.ToSmallCaps("Usage"),
-			telegram.ToSmallCaps("Available Flags"),
-			telegram.ToSmallCaps("Bulk Leech (reply to links)"),
-			telegram.ToSmallCaps("Custom File Name"),
-			telegram.ToSmallCaps("Compress as Zip"),
-			telegram.ToSmallCaps("Extract Archive"),
-			telegram.ToSmallCaps("Extraction Password"),
-			telegram.ToSmallCaps("Generate Screenshots"),
-			telegram.ToSmallCaps("Upload as Document"),
-			telegram.ToSmallCaps("Upload as Media"),
-			telegram.ToSmallCaps("Custom Dump Chat ID"),
-			telegram.ToSmallCaps("Extract Video Streams"))
+			telegram.ToSmallCaps("Penggunaan Perintah Leech"),
+			telegram.ToSmallCaps("Penggunaan"),
+			telegram.ToSmallCaps("Opsi Tersedia"),
+			telegram.ToSmallCaps("Leech Massal (balas tautan)"),
+			telegram.ToSmallCaps("Nama Berkas Kustom"),
+			telegram.ToSmallCaps("Kompres sebagai Zip"),
+			telegram.ToSmallCaps("Ekstrak Arsip"),
+			telegram.ToSmallCaps("Kata Sandi Ekstraksi"),
+			telegram.ToSmallCaps("Buat Tangkapan Layar"),
+			telegram.ToSmallCaps("Unggah sebagai Dokumen"),
+			telegram.ToSmallCaps("Unggah sebagai Media"),
+			telegram.ToSmallCaps("ID Chat Dump Kustom"),
+			telegram.ToSmallCaps("Ekstrak Aliran Video"))
 		_, _ = m.sender.SendMessage(ctx, peer, helpMsg, msg.MessageID, nil)
 		return
 	}
 
 	if link != "" && !ext.IsURL(link) && !ext.IsMagnet(link) && !ext.IsMegaLink(link) && !strings.HasPrefix(link, "tg://") {
-		m.sendDownloadError(ctx, peer, msg, 0, "Invalid link or resource not found! Please check the URL.", "#Leech", time.Now())
+		m.sendDownloadError(ctx, peer, msg, 0, "Tautan tidak valid atau sumber daya tidak ditemukan! Silakan periksa URL.", "#Leech", time.Now())
 		return
 	}
 
@@ -278,7 +278,7 @@ func (m *LeechModule) HandleLeech(ctx context.Context, peer tg.InputPeerClass, m
 		isFirstStatus = m.statusMod.ReserveStatusSlot(msg.ChatID)
 	}
 
-	notifyID, _ := m.sender.SendMessage(ctx, peer, fmt.Sprintf("<i>%s...</i>", telegram.ToSmallCaps("Initiating Leech Task")), msg.MessageID, nil)
+	notifyID, _ := m.sender.SendMessage(ctx, peer, fmt.Sprintf("<i>%s...</i>", telegram.ToSmallCaps("Memulai Tugas Leech")), msg.MessageID, nil)
 	if notifyID > 0 && m.statusMod != nil {
 		if isFirstStatus {
 			m.statusMod.SetStatusMessage(msg.ChatID, notifyID, peer)
@@ -297,12 +297,12 @@ func (m *LeechModule) sendDownloadError(ctx context.Context, peer tg.InputPeerCl
 	}
 
 	elapsed := ext.TimeSinceFormatted(startTime)
-	errMsg := fmt.Sprintf("<i><b>Download Stopped!</b></i>\n"+
-		"┠ <b>Task for:</b> %s\n"+
+	errMsg := fmt.Sprintf("<i><b>Unduhan Dihentikan!</b></i>\n"+
+		"┠ <b>Tugas untuk:</b> %s\n"+
 		"┃\n"+
-		"┠ <b>Due To:</b> %s\n"+
+		"┠ <b>Karena:</b> %s\n"+
 		"┠ <b>Mode:</b> %s\n"+
-		"┖ <b>Elapsed:</b> %s",
+		"┖ <b>Waktu Berlalu:</b> %s",
 		tag, telegram.EscapeHTML(errStr), mode, elapsed)
 
 	if notifyID > 0 {
@@ -342,7 +342,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 
 	// 0. Quota and Task Limits Pre-check
 	if limitErr := ext.CheckTaskLimits(msg.UserID, 0, "leech", opt.IsExtract, opt.IsZip, 0); limitErr != "" {
-		m.sendDownloadError(ctx, peer, msg, notifyID, "Limit Exceeded: "+limitErr, "#Leech", time.Now())
+		m.sendDownloadError(ctx, peer, msg, notifyID, "Batas Terlampaui: "+limitErr, "#Leech", time.Now())
 		return
 	}
 
@@ -382,9 +382,9 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 		} else if msg.FileName != "" {
 			displayName = msg.FileName
 		} else if msg.IsReply {
-			displayName = "Telegram File"
+			displayName = "Berkas Telegram"
 		} else {
-			displayName = "Leech Task"
+			displayName = "Tugas Leech"
 		}
 	}
 	displayName = filepath.Base(displayName)
@@ -453,11 +453,11 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 	// 0. Queue Check for Download (Sleep v0 Engine)
 	queuedDL, qErr := ext.AcquireDownloadQueue(ctx, taskUID, displayName, msg.FileSize, msg.ChatID, msg.UserID, notifyID, cancel)
 	if qErr != nil {
-		m.sendDownloadError(ctx, peer, msg, notifyID, "Download task cancelled while in queue", modeStr, taskStartTime)
+		m.sendDownloadError(ctx, peer, msg, notifyID, "Tugas unduhan dibatalkan saat dalam antrean", modeStr, taskStartTime)
 		return
 	}
 	if queuedDL {
-		_ = m.sender.EditMessage(ctx, peer, notifyID, "<i>Starting download from queue...</i>", nil)
+		_ = m.sender.EditMessage(ctx, peer, notifyID, "<i>Memulai unduhan dari antrean...</i>", nil)
 	}
 
 	// 1. Download Phase
@@ -482,7 +482,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 				}
 			} else if err != nil {
 				log.Printf("[LEECH] Failed to fetch replied message %d: %v", msg.ReplyToID, err)
-				dlErr = fmt.Errorf("failed to fetch replied message: %v", err)
+				dlErr = fmt.Errorf("gagal mengambil pesan yang dibalas: %v", err)
 			}
 		}
 
@@ -599,7 +599,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 										}
 									}
 								}
-								return nil, fmt.Errorf("failed to refresh file reference")
+								return nil, fmt.Errorf("gagal menyegarkan referensi berkas")
 							}
 
 							err := chunkDL.DownloadToFile(ctx, loc, doc.Size, destPath, func(curr, total int64, speed float64, eta string) {
@@ -615,11 +615,11 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 								dlErr = err
 							}
 						} else {
-							dlErr = fmt.Errorf("failed to get Telegram document file location")
+							dlErr = fmt.Errorf("gagal mendapatkan lokasi berkas dokumen Telegram")
 						}
 					}
 				} else {
-					dlErr = fmt.Errorf("replied document is empty or unavailable")
+					dlErr = fmt.Errorf("dokumen yang dibalas kosong atau tidak tersedia")
 				}
 			} else if photoMedia, ok := mediaSource.(*tg.MessageMediaPhoto); ok {
 				// Case 1B: Photo Media
@@ -636,7 +636,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 					destPath := filepath.Join(taskDir, fileName)
 					_ = os.MkdirAll(filepath.Dir(destPath), 0777)
 					uTask.SetName(fileName)
-					uTask.SetStatus(types.StatusDownloading, "Telegram Photo")
+					uTask.SetStatus(types.StatusDownloading, "Foto Telegram")
 
 					thumbSize := "m"
 					if len(photo.Sizes) > 0 {
@@ -663,13 +663,13 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 							dlErr = err
 						}
 					} else {
-						dlErr = fmt.Errorf("failed to get Telegram photo location")
+						dlErr = fmt.Errorf("gagal mendapatkan lokasi foto Telegram")
 					}
 				} else {
-					dlErr = fmt.Errorf("replied photo is empty or unavailable")
+					dlErr = fmt.Errorf("foto yang dibalas kosong atau tidak tersedia")
 				}
 			} else {
-				dlErr = fmt.Errorf("unsupported media in replied message")
+				dlErr = fmt.Errorf("media tidak didukung dalam pesan yang dibalas")
 			}
 		}
 	}
@@ -680,20 +680,20 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 		gdrive := downloader.GetGDriveClient()
 		fileID := downloader.ExtractGDriveID(link)
 		if fileID == "" {
-			m.sendDownloadError(ctx, peer, msg, notifyID, "Google Drive Error: Unable to extract file/folder ID", modeStr, taskStartTime)
+			m.sendDownloadError(ctx, peer, msg, notifyID, "Kesalahan Google Drive: Tidak dapat mengekstrak ID berkas/folder", modeStr, taskStartTime)
 			return
 		}
 
 		info, err := gdrive.GetFileInfo(fileID)
 		if err != nil {
-			m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Google Drive Error: %v", err), modeStr, taskStartTime)
+			m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Kesalahan Google Drive: %v", err), modeStr, taskStartTime)
 			return
 		}
 
 		if info.IsDir {
 			files, fErr := gdrive.GetFolderFiles(fileID, "")
 			if fErr != nil || len(files) == 0 {
-				m.sendDownloadError(ctx, peer, msg, notifyID, "Google Drive Error: No files found in folder", modeStr, taskStartTime)
+				m.sendDownloadError(ctx, peer, msg, notifyID, "Kesalahan Google Drive: Tidak ada berkas ditemukan di folder", modeStr, taskStartTime)
 				return
 			}
 
@@ -702,12 +702,12 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 				uidStr := fmt.Sprintf("%d", notifyID)
 				doneChan := RegisterGDriveSelectCache(uidStr, files, msg.UserID)
 				buttons := BuildGDriveSelectionButtons(uidStr)
-				_ = m.sender.EditMessage(ctx, peer, notifyID, "Your Google Drive download paused. Choose files from selection web link then press Done Selecting button.", buttons)
+				_ = m.sender.EditMessage(ctx, peer, notifyID, "Unduhan Google Drive Anda dijeda. Pilih berkas dari tautan web pemilihan lalu tekan tombol Selesai Memilih.", buttons)
 
 				select {
 				case ok := <-doneChan:
 					if !ok {
-						m.sendDownloadError(ctx, peer, msg, notifyID, "Google Drive file selection cancelled by user", modeStr, taskStartTime)
+						m.sendDownloadError(ctx, peer, msg, notifyID, "Pemilihan berkas Google Drive dibatalkan oleh pengguna", modeStr, taskStartTime)
 						return
 					}
 					selectedIDs := web.GDriveStore.ReadSelection(uidStr)
@@ -718,7 +718,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 						}
 					}
 					if len(filtered) == 0 {
-						m.sendDownloadError(ctx, peer, msg, notifyID, "No files selected. Download cancelled.", modeStr, taskStartTime)
+						m.sendDownloadError(ctx, peer, msg, notifyID, "Tidak ada berkas dipilih. Unduhan dibatalkan.", modeStr, taskStartTime)
 						return
 					}
 					filesToDownload = filtered
@@ -728,7 +728,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 			}
 
 			uTask.SetStatus(types.StatusDownloading, "Google Drive")
-			_ = m.sender.EditMessage(ctx, peer, notifyID, fmt.Sprintf("<i>Downloading %d Google Drive files...</i>", len(filesToDownload)), nil)
+			_ = m.sender.EditMessage(ctx, peer, notifyID, fmt.Sprintf("<i>Mengunduh %d berkas Google Drive...</i>", len(filesToDownload)), nil)
 			for i, f := range filesToDownload {
 				if f.IsDir {
 					continue
@@ -772,12 +772,12 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 			}
 			doneChan := RegisterMegaSelectCache(uidStr, mockFiles, msg.UserID)
 			buttons := BuildMegaSelectionButtons(uidStr)
-			_ = m.sender.EditMessage(ctx, peer, notifyID, "Your MEGA download paused. Choose files from selection web link then press Done Selecting button.", buttons)
+			_ = m.sender.EditMessage(ctx, peer, notifyID, "Unduhan MEGA Anda dijeda. Pilih berkas dari tautan web pemilihan lalu tekan tombol Selesai Memilih.", buttons)
 
 			select {
 			case ok := <-doneChan:
 				if !ok {
-					m.sendDownloadError(ctx, peer, msg, notifyID, "MEGA file selection cancelled by user", modeStr, taskStartTime)
+					m.sendDownloadError(ctx, peer, msg, notifyID, "Pemilihan berkas MEGA dibatalkan oleh pengguna", modeStr, taskStartTime)
 					return
 				}
 			case <-ctx.Done():
@@ -802,7 +802,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 			log.Printf("[LEECH] Adding local .torrent file to Aria2c: %s", link)
 			gid, err := aria.AddTorrent(link, taskDir)
 			if err != nil {
-				m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Torrent Error: %v", err), modeStr, taskStartTime)
+				m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Kesalahan Torrent: %v", err), modeStr, taskStartTime)
 				return
 			}
 			task := downloader.NewAria2DownloadTask(gid, opt.CustomName, taskDir, notifyID, msg.ChatID, msg.UserID)
@@ -830,7 +830,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 					log.Printf("[LEECH] AddTorrent error, fallback to AddURI: %v", tErr)
 					gid, aErr := aria.AddURI(link, taskDir, opt.CustomName, nil)
 					if aErr != nil {
-						m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Download Error: %v", aErr), modeStr, taskStartTime)
+						m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Kesalahan Unduhan: %v", aErr), modeStr, taskStartTime)
 						return
 					}
 					task := downloader.NewAria2DownloadTask(gid, opt.CustomName, taskDir, notifyID, msg.ChatID, msg.UserID)
@@ -845,7 +845,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 				log.Printf("[LEECH] DownloadHTTPFile error, fallback to AddURI: %v", err)
 				gid, aErr := aria.AddURI(link, taskDir, opt.CustomName, nil)
 				if aErr != nil {
-					m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Download Error: %v", aErr), modeStr, taskStartTime)
+					m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Kesalahan Unduhan: %v", aErr), modeStr, taskStartTime)
 					return
 				}
 				task := downloader.NewAria2DownloadTask(gid, opt.CustomName, taskDir, notifyID, msg.ChatID, msg.UserID)
@@ -883,7 +883,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 					})
 					downloadedPath = dest
 				} else {
-					m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Download Error: %v", err), modeStr, taskStartTime)
+					m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Kesalahan Unduhan: %v", err), modeStr, taskStartTime)
 					return
 				}
 			} else {
@@ -894,8 +894,8 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 						baseURL = fmt.Sprintf("http://localhost:%d", cfg.BaseURLPort)
 					}
 					b := telegram.NewButtonMaker()
-					b.UButtonStyled("◈ "+telegram.ToSmallCaps("Select Files"), fmt.Sprintf("%s/app/files/%s", strings.TrimSuffix(baseURL, "/"), gid), "primary")
-					_ = m.sender.EditMessage(ctx, peer, notifyID, "Your torrent download paused. Choose files from selection web link then press Confirm on web page.", b.BuildMenu(1))
+					b.UButtonStyled("◈ "+telegram.ToSmallCaps("Pilih Berkas"), fmt.Sprintf("%s/app/files/%s", strings.TrimSuffix(baseURL, "/"), gid), "primary")
+					_ = m.sender.EditMessage(ctx, peer, notifyID, "Unduhan torrent Anda dijeda. Pilih berkas dari tautan web pemilihan lalu tekan Konfirmasi di halaman web.", b.BuildMenu(1))
 				}
 
 				task := downloader.NewAria2DownloadTask(gid, opt.CustomName, taskDir, notifyID, msg.ChatID, msg.UserID)
@@ -921,7 +921,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 		downloadedPath = dest
 	} else {
 		if dlErr == nil {
-			dlErr = fmt.Errorf("no media or valid link found to download")
+			dlErr = fmt.Errorf("tidak ada media atau tautan valid ditemukan untuk diunduh")
 		}
 	}
 
@@ -947,7 +947,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 	if strings.HasSuffix(strings.ToLower(downloadedPath), ".torrent") {
 		log.Printf("[LEECH] Downloaded file is a .torrent file (%s), starting real payload download...", downloadedPath)
 		torrentFile := downloadedPath
-		_ = m.sender.EditMessage(ctx, peer, notifyID, "<i>Processing .torrent metadata & starting payload download...</i>", nil)
+		_ = m.sender.EditMessage(ctx, peer, notifyID, "<i>Memproses metadata .torrent & memulai unduhan muatan...</i>", nil)
 		aria := downloader.GetAria2Client()
 		gid, err := aria.AddTorrent(torrentFile, taskDir)
 		if err == nil {
@@ -960,7 +960,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 				}
 			})
 			if dlErr != nil {
-				_ = m.sender.EditMessage(ctx, peer, notifyID, fmt.Sprintf("<b>Torrent Download Failed:</b> %v", dlErr), nil)
+				_ = m.sender.EditMessage(ctx, peer, notifyID, fmt.Sprintf("<b>Unduhan Torrent Gagal:</b> %v", dlErr), nil)
 				return
 			}
 		}
@@ -968,12 +968,12 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 
 	fi, statErr := os.Stat(downloadedPath)
 	if statErr != nil {
-		m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Downloaded file not found on disk: %v", statErr), modeStr, taskStartTime)
+		m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Berkas yang diunduh tidak ditemukan di disk: %v", statErr), modeStr, taskStartTime)
 		return
 	}
 	if !fi.IsDir() {
 		if fi.Size() == 0 {
-			m.sendDownloadError(ctx, peer, msg, notifyID, "Downloaded file is empty (0 bytes)", modeStr, taskStartTime)
+			m.sendDownloadError(ctx, peer, msg, notifyID, "Berkas yang diunduh kosong (0 byte)", modeStr, taskStartTime)
 			return
 		}
 		uTask.SetSize(fi.Size())
@@ -997,7 +997,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 				downloadedPath = outDir
 			} else {
 				log.Printf("[LEECH -e] Extraction error: %v, continuing with original file", err)
-				_ = m.sender.EditMessage(ctx, peer, notifyID, fmt.Sprintf("⌬ <b>Extraction Warning:</b> %v\nUploading original archive.", err), nil)
+				_ = m.sender.EditMessage(ctx, peer, notifyID, fmt.Sprintf("⌬ <b>Peringatan Ekstraksi:</b> %v\nMengunggah arsip asli.", err), nil)
 			}
 		} else if fi, err := os.Stat(downloadedPath); err == nil && fi.IsDir() {
 			_ = filepath.Walk(downloadedPath, func(p string, info os.FileInfo, err error) error {
@@ -1071,7 +1071,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 	}
 
 	if len(filesToUpload) == 0 {
-		_ = m.sender.EditMessage(ctx, peer, notifyID, "× <b>Download Failed:</b> No payload files found", nil)
+		_ = m.sender.EditMessage(ctx, peer, notifyID, "× <b>Unduhan Gagal:</b> Tidak ada berkas muatan ditemukan", nil)
 		return
 	}
 
@@ -1085,13 +1085,13 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 
 	queuedUP, qUpErr := ext.AcquireUploadQueue(ctx, taskUID, displayName, totalUploadSize, msg.ChatID, msg.UserID, notifyID, cancel)
 	if qUpErr != nil {
-		_ = m.sender.EditMessage(ctx, peer, notifyID, "× <i>Upload task cancelled while in queue</i>", nil)
+		_ = m.sender.EditMessage(ctx, peer, notifyID, "× <i>Tugas unggahan dibatalkan saat dalam antrean</i>", nil)
 		return
 	}
 	defer ext.ReleaseUpload(taskUID)
 
 	if queuedUP {
-		_ = m.sender.EditMessage(ctx, peer, notifyID, "<i>Starting upload from queue...</i>", nil)
+		_ = m.sender.EditMessage(ctx, peer, notifyID, "<i>Memulai unggahan dari antrean...</i>", nil)
 	}
 
 	dlDuration = time.Since(dlStartTime)
@@ -1234,10 +1234,10 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 		for idx, part := range splitParts {
 			partCaption := caption
 			if len(splitParts) > 1 {
-				partCaption = fmt.Sprintf("<b>Part %d/%d</b>\n%s", idx+1, len(splitParts), caption)
+				partCaption = fmt.Sprintf("<b>Bagian %d/%d</b>\n%s", idx+1, len(splitParts), caption)
 			}
 			if len(ssLinks) > 0 {
-				partCaption += fmt.Sprintf("\n\n◈ <a href=\"%s\">Screenshots</a>", ssLinks[0])
+				partCaption += fmt.Sprintf("\n\n◈ <a href=\"%s\">Tangkapan Layar</a>", ssLinks[0])
 			}
 
 			botPM := cfg.BotPM || (user != nil && user.BotPM) || (msg.ChatID != msg.UserID)
@@ -1267,7 +1267,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 			_, upErr := m.uploader.UploadFile(ctx, peer, upOpt)
 			if upErr != nil {
 				log.Printf("[AZML-Go Leech] Upload error for %s: %v", part, upErr)
-				m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Upload Failed: %v", upErr), modeStr, taskStartTime)
+				m.sendDownloadError(ctx, peer, msg, notifyID, fmt.Sprintf("Unggahan Gagal: %v", upErr), modeStr, taskStartTime)
 				return
 			}
 		}
@@ -1306,31 +1306,31 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 		mainName = uploadedNames[0]
 	}
 	sb.WriteString(fmt.Sprintf("<b>%s</b>\n|\n", mainName))
-	sb.WriteString(fmt.Sprintf("├── <b>Size:</b> %s\n", ext.GetReadableFileSize(totalSize)))
-	sb.WriteString(fmt.Sprintf("├── <b>Elapsed:</b> %s\n", ext.GetReadableTime(int64(overallElapsed.Seconds()))))
-	sb.WriteString(fmt.Sprintf("├── <b>Avg DL Speed:</b> %s/s\n", ext.GetReadableFileSize(int64(avgDLSpeed))))
-	sb.WriteString(fmt.Sprintf("├── <b>Avg UL Speed:</b> %s/s\n", ext.GetReadableFileSize(int64(avgULSpeed))))
+	sb.WriteString(fmt.Sprintf("├── <b>Ukuran:</b> %s\n", ext.GetReadableFileSize(totalSize)))
+	sb.WriteString(fmt.Sprintf("├── <b>Waktu Berlalu:</b> %s\n", ext.GetReadableTime(int64(overallElapsed.Seconds()))))
+	sb.WriteString(fmt.Sprintf("├── <b>Kecepatan Unduh Rata-rata:</b> %s/s\n", ext.GetReadableFileSize(int64(avgDLSpeed))))
+	sb.WriteString(fmt.Sprintf("├── <b>Kecepatan Unggah Rata-rata:</b> %s/s\n", ext.GetReadableFileSize(int64(avgULSpeed))))
 	sb.WriteString(fmt.Sprintf("├── <b>Mode:</b> %s\n", modeStr))
-	sb.WriteString(fmt.Sprintf("├── <b>Max DL Speed:</b> %s/s\n", ext.GetReadableFileSize(int64(maxDLSpeed))))
-	sb.WriteString(fmt.Sprintf("├── <b>Max UL Speed:</b> %s/s\n", ext.GetReadableFileSize(int64(maxULSpeed))))
-	sb.WriteString(fmt.Sprintf("├── <b>Total Files:</b> %d\n", len(uploadedNames)))
+	sb.WriteString(fmt.Sprintf("├── <b>Kecepatan Unduh Maksimal:</b> %s/s\n", ext.GetReadableFileSize(int64(maxDLSpeed))))
+	sb.WriteString(fmt.Sprintf("├── <b>Kecepatan Unggah Maksimal:</b> %s/s\n", ext.GetReadableFileSize(int64(maxULSpeed))))
+	sb.WriteString(fmt.Sprintf("├── <b>Total Berkas:</b> %d\n", len(uploadedNames)))
 
 	userTag := fmt.Sprintf("@%s", msg.Username)
 	if msg.Username == "" {
 		userTag = fmt.Sprintf("<a href=\"tg://user?id=%d\">%s</a>", msg.UserID, msg.SenderName)
 	}
-	sb.WriteString(fmt.Sprintf("└── <b>By:</b> %s\n\n", userTag))
+	sb.WriteString(fmt.Sprintf("└── <b>Oleh:</b> %s\n\n", userTag))
 
 	botPM := cfg.BotPM || (user != nil && user.BotPM) || (msg.ChatID != msg.UserID)
 	if botPM {
-		sb.WriteString("➲ <i>File(s) have been Sent to Bot PM (Private)</i>\n")
+		sb.WriteString("➲ <i>Berkas telah Dikirim ke PM Bot (Pribadi)</i>\n")
 	} else {
-		sb.WriteString("➲ <i>File(s) have been Sent. Access via Links...</i>\n")
+		sb.WriteString("➲ <i>Berkas telah Dikirim. Akses melalui tautan...</i>\n")
 	}
 
 	for idx, upF := range uploadedNames {
 		if idx >= 10 {
-			sb.WriteString(fmt.Sprintf("<i>...and %d more file(s)</i>\n", len(uploadedNames)-10))
+			sb.WriteString(fmt.Sprintf("<i>...dan %d berkas lagi</i>\n", len(uploadedNames)-10))
 			break
 		}
 		sb.WriteString(fmt.Sprintf("%d. <code>%s</code>\n", idx+1, upF))
@@ -1341,7 +1341,7 @@ func (m *LeechModule) processLeechPipeline(peer tg.InputPeerClass, msg *types.Me
 		botUser = "Yukiileechrrbot"
 	}
 	finishBtn := telegram.NewButtonMaker()
-	finishBtn.UButtonStyled("◈ "+telegram.ToSmallCaps("View in Bot PM"), fmt.Sprintf("https://t.me/%s", botUser), "primary")
+	finishBtn.UButtonStyled("◈ "+telegram.ToSmallCaps("Lihat di PM Bot"), fmt.Sprintf("https://t.me/%s", botUser), "primary")
 
 	// Send completion message into the group / chat where leech was initiated, replying to user's command
 	_, _ = m.sender.SendMessageWithButtons(ctx, peer, sb.String(), msg.MessageID, finishBtn, 1)

@@ -187,7 +187,7 @@ func DownloadHTTPFile(ctx context.Context, urlStr, destPath string) error {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("bad HTTP status: %d", resp.StatusCode)
+		return fmt.Errorf("status HTTP tidak valid: %d", resp.StatusCode)
 	}
 
 	_ = os.MkdirAll(filepath.Dir(destPath), 0755)

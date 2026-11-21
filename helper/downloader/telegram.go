@@ -119,7 +119,7 @@ func (d *TelegramChunkDownloader) DownloadToFile(
 	_ = os.MkdirAll(filepath.Dir(destPath), 0777)
 
 	if fileSize <= 0 {
-		return fmt.Errorf("invalid file size %d for chunk download", fileSize)
+		return fmt.Errorf("ukuran berkas tidak valid %d untuk unduhan potongan", fileSize)
 	}
 
 	// MTProto optimal chunk size: 1MB (1048576) — maximum allowed by Telegram API.
@@ -133,7 +133,7 @@ func (d *TelegramChunkDownloader) DownloadToFile(
 
 	out, err := os.OpenFile(destPath, os.O_CREATE|os.O_RDWR, 0755)
 	if err != nil {
-		return fmt.Errorf("failed to open destination file %s: %w", destPath, err)
+		return fmt.Errorf("gagal membuka berkas tujuan %s: %w", destPath, err)
 	}
 	defer func() { _ = out.Close() }()
 
@@ -242,7 +242,7 @@ func (d *TelegramChunkDownloader) DownloadToFile(
 				data, partErr := d.getPartWithRetry(ctx, loc, offset, requestLimit, partIndex, totalParts, refreshRef)
 				if partErr != nil {
 					errOnce.Do(func() {
-						firstErr = fmt.Errorf("download failed at part %d/%d (offset %d): %w", partIndex+1, totalParts, offset, partErr)
+						firstErr = fmt.Errorf("unduhan gagal pada bagian %d/%d (offset %d): %w", partIndex+1, totalParts, offset, partErr)
 					})
 					return
 				}
@@ -255,14 +255,14 @@ func (d *TelegramChunkDownloader) DownloadToFile(
 
 				if int64(len(data)) < actualBytes {
 					errOnce.Do(func() {
-						firstErr = fmt.Errorf("incomplete chunk at part %d/%d (offset %d): got %d bytes, expected %d", partIndex+1, totalParts, offset, len(data), actualBytes)
+						firstErr = fmt.Errorf("potongan tidak lengkap pada bagian %d/%d (offset %d): mendapat %d byte, diharapkan %d", partIndex+1, totalParts, offset, len(data), actualBytes)
 					})
 					return
 				}
 
 				if _, wErr := out.WriteAt(data, offset); wErr != nil {
 					errOnce.Do(func() {
-						firstErr = fmt.Errorf("failed to write part %d to disk: %w", partIndex+1, wErr)
+						firstErr = fmt.Errorf("gagal menulis bagian %d ke disk: %w", partIndex+1, wErr)
 					})
 					return
 				}
@@ -285,7 +285,7 @@ func (d *TelegramChunkDownloader) DownloadToFile(
 	_ = out.Sync()
 	if fi, sErr := out.Stat(); sErr == nil {
 		if fi.Size() != fileSize {
-			return fmt.Errorf("downloaded file size mismatch: got %d bytes, expected %d bytes", fi.Size(), fileSize)
+			return fmt.Errorf("ukuran berkas unduhan tidak cocok: mendapat %d byte, diharapkan %d byte", fi.Size(), fileSize)
 		}
 	}
 	reportProgress(fileSize)
@@ -337,7 +337,7 @@ func (d *TelegramChunkDownloader) getPartWithRetry(
 				if len(f.Bytes) == 0 {
 					transientAttempts++
 					if transientAttempts > maxTransientRetries {
-						return nil, fmt.Errorf("received empty chunk after %d retries", maxTransientRetries)
+						return nil, fmt.Errorf("menerima potongan kosong setelah %d percobaan ulang", maxTransientRetries)
 					}
 					select {
 					case <-ctx.Done():
@@ -349,7 +349,7 @@ func (d *TelegramChunkDownloader) getPartWithRetry(
 				d.decayPacing()
 				return f.Bytes, nil
 			default:
-				return nil, fmt.Errorf("unexpected file response %T", res)
+				return nil, fmt.Errorf("respons berkas tidak terduga %T", res)
 			}
 		}
 
@@ -397,7 +397,7 @@ func (d *TelegramChunkDownloader) getPartWithRetry(
 		// 3. Transient error — exponential backoff with jitter
 		transientAttempts++
 		if transientAttempts > maxTransientRetries {
-			return nil, fmt.Errorf("part %d/%d failed after %d transient attempts: %w", partIndex+1, totalParts, maxTransientRetries, err)
+			return nil, fmt.Errorf("bagian %d/%d gagal setelah %d percobaan sementara: %w", partIndex+1, totalParts, maxTransientRetries, err)
 		}
 
 		backoff := time.Duration(transientAttempts) * 500 * time.Millisecond

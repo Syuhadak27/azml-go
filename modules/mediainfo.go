@@ -39,19 +39,19 @@ func (m *MediaInfoModule) HandleMediaInfo(ctx context.Context, peer tg.InputPeer
 	}
 
 	if link == "" {
-		helpMsg := "<b>MediaInfo Usage:</b>\n" +
+		helpMsg := "<b>Penggunaan MediaInfo:</b>\n" +
 			"• <code>/mediainfo [download link]</code>\n" +
-			"• Reply to a download link with <code>/mediainfo</code>"
+			"• Balas tautan unduhan dengan <code>/mediainfo</code>"
 		_, _ = m.sender.SendMessage(ctx, peer, helpMsg, msg.MessageID, nil)
 		return
 	}
 
-	waitID, _ := m.sender.SendMessage(ctx, peer, "<i>Generating MediaInfo...</i>", msg.MessageID, nil)
+	waitID, _ := m.sender.SendMessage(ctx, peer, "<i>Membuat MediaInfo...</i>", msg.MessageID, nil)
 
 	go func() {
 		tmpDir, err := os.MkdirTemp("", "mediainfo_*")
 		if err != nil {
-			_ = m.sender.EditMessage(ctx, peer, waitID, "Error creating temp dir", nil)
+			_ = m.sender.EditMessage(ctx, peer, waitID, "Kesalahan membuat folder sementara", nil)
 			return
 		}
 		defer os.RemoveAll(tmpDir)
@@ -62,7 +62,7 @@ func (m *MediaInfoModule) HandleMediaInfo(ctx context.Context, peer tg.InputPeer
 		client := &http.Client{Timeout: 30 * time.Second}
 		req, err := http.NewRequestWithContext(ctx, "GET", link, nil)
 		if err != nil {
-			_ = m.sender.EditMessage(ctx, peer, waitID, fmt.Sprintf("Error request: %v", err), nil)
+			_ = m.sender.EditMessage(ctx, peer, waitID, fmt.Sprintf("Kesalahan permintaan: %v", err), nil)
 			return
 		}
 		req.Header.Set("User-Agent", "Mozilla/5.0")
@@ -70,14 +70,14 @@ func (m *MediaInfoModule) HandleMediaInfo(ctx context.Context, peer tg.InputPeer
 
 		resp, err := client.Do(req)
 		if err != nil {
-			_ = m.sender.EditMessage(ctx, peer, waitID, fmt.Sprintf("Failed to fetch media: %v", err), nil)
+			_ = m.sender.EditMessage(ctx, peer, waitID, fmt.Sprintf("Gagal mengambil media: %v", err), nil)
 			return
 		}
 		defer resp.Body.Close()
 
 		f, err := os.Create(destFile)
 		if err != nil {
-			_ = m.sender.EditMessage(ctx, peer, waitID, "Failed to create temp file", nil)
+			_ = m.sender.EditMessage(ctx, peer, waitID, "Gagal membuat berkas sementara", nil)
 			return
 		}
 		_, _ = io.CopyN(f, resp.Body, 1024*1024)
@@ -88,7 +88,7 @@ func (m *MediaInfoModule) HandleMediaInfo(ctx context.Context, peer tg.InputPeer
 			fileName = filepath.Base(u.Path)
 		}
 		if fileName == "" || fileName == "/" || fileName == "." {
-			fileName = "Media_File"
+			fileName = "Berkas_Media"
 		}
 
 		infoText := runMediaInfo(destFile)
@@ -96,11 +96,11 @@ func (m *MediaInfoModule) HandleMediaInfo(ctx context.Context, peer tg.InputPeer
 
 		pageURL, err := createTelegraphPage("MediaInfo X", formattedHTML)
 		if err != nil {
-			_ = m.sender.EditMessage(ctx, peer, waitID, fmt.Sprintf("<b>MediaInfo Output:</b>\n<pre>%s</pre>", truncateString(infoText, 3000)), nil)
+			_ = m.sender.EditMessage(ctx, peer, waitID, fmt.Sprintf("<b>Hasil MediaInfo:</b>\n<pre>%s</pre>", truncateString(infoText, 3000)), nil)
 			return
 		}
 
-		respText := fmt.Sprintf("<b>MediaInfo:</b>\n\n➲ <b>Link :</b> %s", pageURL)
+		respText := fmt.Sprintf("<b>MediaInfo:</b>\n\n➲ <b>Tautan :</b> %s", pageURL)
 		_ = m.sender.EditMessage(ctx, peer, waitID, respText, nil)
 	}()
 }
@@ -127,11 +127,11 @@ func runMediaInfo(filePath string) string {
 
 	meta, _ := ext.ProbeMedia(filePath)
 	if meta != nil {
-		return fmt.Sprintf("Video: %s\nDuration: %d s\nResolution: %dx%d\nAudio: %s\nQuality: %s",
+		return fmt.Sprintf("Video: %s\nDurasi: %d detik\nResolusi: %dx%d\nAudio: %s\nKualitas: %s",
 			meta.VideoCodec, meta.Duration, meta.Width, meta.Height, meta.AudioCodec, meta.Quality)
 	}
 
-	return "No MediaInfo could be extracted."
+	return "MediaInfo tidak dapat diekstrak."
 }
 
 func formatMediaInfoHTML(fileName, out string) string {

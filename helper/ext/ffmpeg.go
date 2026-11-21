@@ -246,7 +246,7 @@ func EditMetadata(inputFile, outputFile string, meta map[string]string) error {
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
 		_ = os.Remove(outputFile)
-		return fmt.Errorf("ffmpeg metadata failed: %v, stderr: %s", err, stderr.String())
+		return fmt.Errorf("metadata ffmpeg gagal: %v, stderr: %s", err, stderr.String())
 	}
 	return nil
 }
@@ -290,7 +290,7 @@ func ExtractStreams(inputFile, outDir string, streamOptions []string) ([]string,
 	}
 
 	if len(outputs) == 0 {
-		return nil, errors.New("no streams extracted")
+		return nil, errors.New("tidak ada stream yang diekstrak")
 	}
 	return outputs, nil
 }
@@ -312,11 +312,11 @@ func CheckFFmpegCommandSafety(cmdParts []string) (bool, string) {
 	for i, arg := range cmdParts {
 		argLower := strings.ToLower(arg)
 		if blockedFlags[argLower] {
-			return false, fmt.Sprintf("Flag '%s' requires re-encoding which is disabled in Bot Settings", arg)
+			return false, fmt.Sprintf("Flag '%s' memerlukan pengkodean ulang yang dinonaktifkan di Pengaturan Bot", arg)
 		}
 		for prefix := range map[string]bool{"-filter": true, "-b": true, "-q": true, "-profile": true} {
 			if strings.HasPrefix(argLower, prefix+":") {
-				return false, fmt.Sprintf("Flag '%s' requires re-encoding which is disabled in Bot Settings", arg)
+				return false, fmt.Sprintf("Flag '%s' memerlukan pengkodean ulang yang dinonaktifkan di Pengaturan Bot", arg)
 			}
 		}
 
@@ -326,10 +326,10 @@ func CheckFFmpegCommandSafety(cmdParts []string) (bool, string) {
 			if i+1 < len(cmdParts) {
 				val := strings.ToLower(cmdParts[i+1])
 				if val != "copy" && val != "none" {
-					return false, fmt.Sprintf("Codec '%s' requires re-encoding. Only 'copy' or stream removal is allowed", val)
+					return false, fmt.Sprintf("Codec '%s' memerlukan pengkodean ulang. Hanya 'copy' atau penghapusan stream yang diizinkan", val)
 				}
 			} else {
-				return false, fmt.Sprintf("Missing codec value after '%s'", arg)
+				return false, fmt.Sprintf("Nilai codec tidak ditemukan setelah '%s'", arg)
 			}
 		}
 	}
@@ -356,7 +356,7 @@ func CheckFFmpegCommandSafety(cmdParts []string) (bool, string) {
 	}
 
 	if !hasGlobalCopy && !(hasVideoCopy && hasAudioCopy) {
-		return false, "FFmpeg command must specify '-c copy' or explicit '-c:v copy' / '-c:a copy' to prevent default re-encoding."
+		return false, "Perintah FFmpeg harus menentukan '-c copy' atau '-c:v copy' / '-c:a copy' secara eksplisit untuk mencegah pengkodean ulang bawaan."
 	}
 
 	return true, ""
@@ -366,13 +366,13 @@ func CheckFFmpegCommandSafety(cmdParts []string) (bool, string) {
 func ExecuteCustomFFmpeg(inputFile, outputFile string, rawCmd string, allowEncoding bool) error {
 	parts := strings.Fields(rawCmd)
 	if len(parts) == 0 {
-		return errors.New("empty ffmpeg command")
+		return errors.New("perintah ffmpeg kosong")
 	}
 
 	if !allowEncoding {
 		safe, reason := CheckFFmpegCommandSafety(parts)
 		if !safe {
-			return fmt.Errorf("ffmpeg command blocked: %s", reason)
+			return fmt.Errorf("perintah ffmpeg diblokir: %s", reason)
 		}
 	}
 
@@ -384,7 +384,7 @@ func ExecuteCustomFFmpeg(inputFile, outputFile string, rawCmd string, allowEncod
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("ffmpeg execution failed: %v, stderr: %s", err, stderr.String())
+		return fmt.Errorf("eksekusi ffmpeg gagal: %v, stderr: %s", err, stderr.String())
 	}
 	return nil
 }

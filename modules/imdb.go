@@ -42,7 +42,7 @@ type tmdbSearchMulti struct {
 func (m *ImdbModule) HandleImdb(ctx context.Context, peer tg.InputPeerClass, msg *types.MessageContext) {
 	parts := strings.Fields(msg.Text)
 	if len(parts) < 2 {
-		helpMsg := "<b>IMDb Search Usage:</b>\n" +
+		helpMsg := "<b>Penggunaan Pencarian IMDb:</b>\n" +
 			"• <code>/imdb [movie or series name]</code>\n" +
 			"• <code>/imdb tt1234567</code>"
 		_, _ = m.sender.SendMessage(ctx, peer, helpMsg, msg.MessageID, nil)
@@ -50,7 +50,7 @@ func (m *ImdbModule) HandleImdb(ctx context.Context, peer tg.InputPeerClass, msg
 	}
 
 	query := strings.Join(parts[1:], " ")
-	waitID, _ := m.sender.SendMessage(ctx, peer, "<i>Searching IMDb...</i>", msg.MessageID, nil)
+	waitID, _ := m.sender.SendMessage(ctx, peer, "<i>Mencari di IMDb...</i>", msg.MessageID, nil)
 
 	go func() {
 		cfg := config.Get()
@@ -64,7 +64,7 @@ func (m *ImdbModule) HandleImdb(ctx context.Context, peer tg.InputPeerClass, msg
 
 		req, err := http.NewRequestWithContext(ctx, "GET", searchURL, nil)
 		if err != nil {
-			_ = m.sender.EditMessage(ctx, peer, waitID, "Error building request", nil)
+			_ = m.sender.EditMessage(ctx, peer, waitID, "Kesalahan menyusun permintaan", nil)
 			return
 		}
 		if len(token) >= 50 {
@@ -90,26 +90,26 @@ func (m *ImdbModule) HandleImdb(ctx context.Context, peer tg.InputPeerClass, msg
 				if json.NewDecoder(fbResp.Body).Decode(&fbData) == nil && len(fbData.Description) > 0 {
 					item := fbData.Description[0]
 					text := fmt.Sprintf("⌬ <b><u>%s (%d)</u></b>\n"+
-						"• <b>Actors:</b> <code>%s</code>\n"+
+						"• <b>Pemeran:</b> <code>%s</code>\n"+
 						"• <b>IMDb ID:</b> <code>%s</code>",
 						item.Title, item.Year, item.Actors, item.IMDbID)
 
 					btn := telegram.NewButtonMaker()
 					if item.IMDbURL != "" {
-						btn.UButtonStyled("◈ "+telegram.ToSmallCaps("Open on IMDb"), item.IMDbURL, "primary")
+						btn.UButtonStyled("◈ "+telegram.ToSmallCaps("Buka di IMDb"), item.IMDbURL, "primary")
 					}
 					_ = m.sender.EditMessageWithButtons(ctx, peer, waitID, text, btn, 1)
 					return
 				}
 			}
-			_ = m.sender.EditMessage(ctx, peer, waitID, "<i>No IMDb results found.</i>", nil)
+			_ = m.sender.EditMessage(ctx, peer, waitID, "<i>Tidak ada hasil IMDb yang ditemukan.</i>", nil)
 			return
 		}
 		defer resp.Body.Close()
 
 		var res tmdbSearchMulti
 		if err := json.NewDecoder(resp.Body).Decode(&res); err != nil || len(res.Results) == 0 {
-			_ = m.sender.EditMessage(ctx, peer, waitID, "<i>No IMDb results found.</i>", nil)
+			_ = m.sender.EditMessage(ctx, peer, waitID, "<i>Tidak ada hasil IMDb yang ditemukan.</i>", nil)
 			return
 		}
 
@@ -134,12 +134,12 @@ func (m *ImdbModule) HandleImdb(ctx context.Context, peer tg.InputPeerClass, msg
 
 		text := fmt.Sprintf("⌬ <b><u>%s (%s)</u></b>\n"+
 			"• <b>Rating:</b> <code>%.1f / 10</code>\n"+
-			"• <b>Release:</b> <code>%s</code>\n\n"+
-			"• <b>Overview:</b>\n<i>%s</i>",
+			"• <b>Rilis:</b> <code>%s</code>\n\n"+
+			"• <b>Ringkasan:</b>\n<i>%s</i>",
 			name, year, item.VoteAverage, date, overview)
 
 		btn := telegram.NewButtonMaker()
-		btn.UButtonStyled("◈ "+telegram.ToSmallCaps("TMDb Page"), fmt.Sprintf("https://www.themoviedb.org/%s/%d", "movie", item.ID), "primary")
+		btn.UButtonStyled("◈ "+telegram.ToSmallCaps("Halaman TMDb"), fmt.Sprintf("https://www.themoviedb.org/%s/%d", "movie", item.ID), "primary")
 		_ = m.sender.EditMessageWithButtons(ctx, peer, waitID, text, btn, 1)
 	}()
 }

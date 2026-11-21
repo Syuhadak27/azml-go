@@ -115,7 +115,7 @@ func (g *GDriveClient) LoadCredentials(tokenPath string) error {
 		log.Println("[GDRIVE] Successfully loaded credentials from token.pickle")
 		return nil
 	}
-	return fmt.Errorf("no valid credentials found in token.pickle")
+	return fmt.Errorf("kredensial valid tidak ditemukan di token.pickle")
 }
 
 func extractPickleStrings(data []byte) []string {
@@ -178,7 +178,7 @@ func (g *GDriveClient) GetAccessToken() (string, error) {
 		if g.accessToken != "" {
 			return g.accessToken, nil
 		}
-		return "", fmt.Errorf("no refresh_token or access_token available")
+		return "", fmt.Errorf("tidak ada refresh_token atau access_token yang tersedia")
 	}
 
 	v := url.Values{}
@@ -203,7 +203,7 @@ func (g *GDriveClient) GetAccessToken() (string, error) {
 		return "", err
 	}
 	if res.Error != "" {
-		return "", fmt.Errorf("token refresh error: %s", res.Error)
+		return "", fmt.Errorf("kesalahan penyegaran token: %s", res.Error)
 	}
 
 	g.accessToken = res.AccessToken
@@ -250,7 +250,7 @@ func (g *GDriveClient) GetFileInfo(id string) (*GDriveFile, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		b, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("gdrive API error (%d): %s", resp.StatusCode, string(b))
+		return nil, fmt.Errorf("kesalahan API gdrive (%d): %s", resp.StatusCode, string(b))
 	}
 
 	var f GDriveFile
@@ -352,7 +352,7 @@ func (g *GDriveClient) DownloadFile(ctx context.Context, fileID, destDir, fileNa
 							return nil
 						}
 						if status.Status == "error" {
-							return fmt.Errorf("aria2c gdrive download failed: %s", status.ErrorMessage)
+							return fmt.Errorf("unduhan gdrive aria2c gagal: %s", status.ErrorMessage)
 						}
 					}
 				}
@@ -374,7 +374,7 @@ func (g *GDriveClient) DownloadFile(ctx context.Context, fileID, destDir, fileNa
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("gdrive download returned HTTP %d", resp.StatusCode)
+		return fmt.Errorf("unduhan gdrive mengembalikan HTTP %d", resp.StatusCode)
 	}
 
 	outPath := filepath.Join(destDir, fileName)
